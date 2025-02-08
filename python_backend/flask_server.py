@@ -11,9 +11,7 @@ from llm_models import LLMModelInterface
 from notion_client import Client
 from dotenv import load_dotenv
 from meet import minutes_meet
-
 from flask import Flask, request, jsonify
-from playwright.async_api import async_playwright
 import asyncio
 import nest_asyncio
 from functools import wraps
@@ -158,58 +156,58 @@ def is_primary_inbox_email(service, user_id, msg_id):
         print(f"An error occurred checking labels: {error}")
         return False
 
-# @app.route('/api/emails', methods=['GET'])
-# def get_mails():
-#     try:
-#         # Get Gmail service
-#         service = get_gmail_service()
+@app.route('/api/emails', methods=['GET'])
+def get_mails():
+    try:
+        # Get Gmail service
+        service = get_gmail_service()
         
-#         # Search for unread emails with primary inbox filter
-#         results = service.users().messages().list(
-#             userId='me',
-#             q='is:unread category:primary',  # Add category:primary to filter
-#             maxResults=20
-#         ).execute()
+        # Search for unread emails with primary inbox filter
+        results = service.users().messages().list(
+            userId='me',
+            q='is:unread category:primary',  # Add category:primary to filter
+            maxResults=20
+        ).execute()
         
-#         messages = results.get('messages', [])
+        messages = results.get('messages', [])
         
-#         if not messages:
-#             return jsonify({
-#                 'status': 'success',
-#                 'message': 'No unread messages found in primary inbox',
-#                 'data': []
-#             }), 200
+        if not messages:
+            return jsonify({
+                'status': 'success',
+                'message': 'No unread messages found in primary inbox',
+                'data': []
+            }), 200
             
-#         # Process each message
-#         emails = []
-#         for message in messages:
-#             # Double-check if the message is in primary inbox
-#             if is_primary_inbox_email(service, 'me', message['id']):
-#                 subject, content = get_email_content(service, 'me', message['id'])
-#                 if subject and content:
-#                     # Clean the content - remove excessive newlines and spaces
-#                     content = ' '.join(content.split())
-#                     emails.append({
-#                         'subject': subject,
-#                         'content': content,
-#                         'id': message['id']
-#                     })
+        # Process each message
+        emails = []
+        for message in messages:
+            # Double-check if the message is in primary inbox
+            if is_primary_inbox_email(service, 'me', message['id']):
+                subject, content = get_email_content(service, 'me', message['id'])
+                if subject and content:
+                    # Clean the content - remove excessive newlines and spaces
+                    content = ' '.join(content.split())
+                    emails.append({
+                        'subject': subject,
+                        'content': content,
+                        'id': message['id']
+                    })
                     
-#                     # Break if we've found 10 primary inbox emails
-#                     if len(emails) >= 10:
-#                         break
+                    # Break if we've found 10 primary inbox emails
+                    if len(emails) >= 10:
+                        break
         
-#         return jsonify({
-#             'status': 'success',
-#             'message': f'Found {len(emails)} unread primary inbox emails',
-#             'data': emails
-#         }), 200
+        return jsonify({
+            'status': 'success',
+            'message': f'Found {len(emails)} unread primary inbox emails',
+            'data': emails
+        }), 200
 
-#     except HttpError as error:
-#         return jsonify({
-#             'status': 'error',
-#             'message': str(error)
-#         }), 500
+    except HttpError as error:
+        return jsonify({
+            'status': 'error',
+            'message': str(error)
+        }), 500
 
 @app.route('/api/minutes_meet', methods=['POST'])
 def minutes_of_meet():

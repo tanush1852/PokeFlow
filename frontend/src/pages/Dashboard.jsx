@@ -4,10 +4,10 @@ import {
   Sparkles, Video, Link2, User, Lock, MapPin, Briefcase,
   Upload, X, Sun, Moon, Plus
 } from 'lucide-react';
+import axios from 'axios'; // Import axios for making HTTP requests
 
 const DragDropInterface = () => {
-  // ... [Previous state and functions remain the same until the return statement]
-   const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [draggedApp, setDraggedApp] = useState(null);
   const [droppedApps, setDroppedApps] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -119,13 +119,59 @@ const DragDropInterface = () => {
     setSelectedFile({ ...selectedFile, [appId]: null });
   };
 
-  const handleSubmit = () => {
-    // Here you would handle the processing of all dropped apps
+  const handleSubmit = async () => {
     console.log('Processing apps with the following data:');
     console.log('Dropped Apps:', droppedApps);
     console.log('Selected Options:', selectedOptions);
     console.log('Credentials:', credentials);
     console.log('Selected Files:', selectedFile);
+
+    for (const app of droppedApps) {
+      const options = selectedOptions[app.id] || {};
+
+      switch (app.name) {
+        case 'Gmail':
+          if (options.loadMails) {
+            try {
+              const response = await axios.get('http://localhost:5000/api/emails');
+              console.log('Emails loaded:', response.data);
+            } catch (error) {
+              console.error('Error loading emails:', error);
+            }
+          }
+          if (options.tasks) {
+            try {
+              const response = await axios.get('http://localhost:5000/api/send_tasks_notion');
+              console.log('Tasks loaded:', response.data);
+            } catch (error) {
+              console.error('Error loading tasks:', error);
+            }
+          }
+
+          if (options.attachments) {
+            try {
+              const response = await axios.get('http://localhost:5000/api/attachments');
+              console.log('Attachments loaded:', response.data);
+            } catch (error) {
+              console.error('Error loading attachments:', error);
+            }
+          }
+          // Add more cases for other options like 'tasks' and 'attachments' if needed
+          break;
+
+        // Add cases for other apps like 'Google Meet', 'LinkedIn', etc.
+        // case 'Google Meet':
+        //   // Handle Google Meet integration
+        //   break;
+
+        // case 'LinkedIn':
+        //   // Handle LinkedIn integration
+        //   break;
+
+        default:
+          console.log(`No integration defined for ${app.name}`);
+      }
+    }
   };
 
   const renderAppOptions = (app) => {
