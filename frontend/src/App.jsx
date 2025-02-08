@@ -14,7 +14,7 @@ function App() {
 
   return (
     <BrowserRouter>
-    <Header/>
+  
     <Toaster/>
     <Routes>
       <Route path="/" element={<LandingPage/>}/>
