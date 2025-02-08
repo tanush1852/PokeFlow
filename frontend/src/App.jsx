@@ -12,6 +12,8 @@ import { Toaster } from 'sonner'
 import ViewTrip from './viewTrip/[id]'
 import JobSearchComponent from './pages/jobSearch'
 import DragDropInterface from './pages/Dashboard'
+import LandingPage from './pages/LandingPage'
+import SavedTemplates from './pages/SavedTemplates'
 function App() {
   const [count, setCount] = useState(0)
 
@@ -20,12 +22,13 @@ function App() {
     <Header/>
     <Toaster/>
     <Routes>
-      <Route path="/" element={<Hero/>}/>
+      <Route path="/" element={<LandingPage/>}/>
       <Route path="/jobSearch" element={<JobSearchComponent/>}/>
       <Route path="/createtrip" element={<CreateTrip/>}/>
       <Route path="/calculate" element={<ExamScoreCalculator/>}/>
       <Route path="/viewTrip/:id" element={<ViewTrip/>}/>
       <Route path="/dashboard" element={<DragDropInterface/>}/>
+      <Route path="/savedTemplates" element={<SavedTemplates/>}/>
       
 
       
