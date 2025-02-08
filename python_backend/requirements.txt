@@ -1,3 +1,4 @@
 flask
 openai
 notion_client
+langchain-openai
