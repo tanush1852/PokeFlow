@@ -1,25 +1,91 @@
 from langchain.chains.summarize import load_summarize_chain
 from langchain.docstore.document import Document
-# from langchain_openai import OpenAI, OpenAIChat
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import CharacterTextSplitter
-
 import os
 import openai
-
 from dotenv import load_dotenv, find_dotenv
-_ = load_dotenv(find_dotenv())
 
-openai_api_key = os.getenv('OPENAI_API_KEY')
-if not openai_api_key:
-    openai_api_key = ""
-    os.environ['OPENAI_API_KEY'] = openai_api_key
+def minutes_meet(text):
 
-target_len = 500
-chunk_size = 3000
-chunk_overlap = 200
-source_text = """
+    # Load environment variables
+    _ = load_dotenv(find_dotenv())
+
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    if not openai_api_key:
+        # Fallback API key if none is available
+        openai_api_key = ""
+        os.environ['OPENAI_API_KEY'] = openai_api_key
+
+    target_len = 500
+    chunk_size = 3000
+    chunk_overlap = 200
+
+    # Split the input text into chunks
+    text_splitter = CharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        length_function=len,
+    )
+    texts = text_splitter.split_text(text)
+    docs = [Document(page_content=t) for t in texts]
+
+    # Initialize the ChatOpenAI model
+    llm = ChatOpenAI(
+        temperature=0, 
+        model="gpt-4o-mini", 
+        api_key=openai_api_key
+    )
+
+    # Main prompt for summarizing
+    prompt_template = """Act as a professional technical meeting minutes writer. 
+Tone: formal
+Format: Technical meeting summary
+Length:  200 ~ 300
+Tasks:
+- highlight action items and owners
+- highlight the agreements
+- Use bullet points if needed
+{text}
+CONCISE SUMMARY IN ENGLISH:"""
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+
+    # Refine prompt for iterative summarization
+    refine_template = (
+        "Your job is to produce a final summary\n"
+        "We have provided an existing summary up to a certain point: {existing_answer}\n"
+        "We have the opportunity to refine the existing summary"
+        "(only if needed) with some more context below.\n"
+        "------------\n"
+        "{text}\n"
+        "------------\n"
+        f"Given the new context, refine the original summary in English within {target_len} words: following the format"
+        "Participants: <participants>"
+        "Discussed: <Discussed-items>"
+        "Follow-up actions: <a-list-of-follow-up-actions-with-owner-names>"
+        "If the context isn't useful, return the original summary. Highlight agreements and follow-up actions and owners."
+    )
+    refine_prompt = PromptTemplate(
+        input_variables=["existing_answer", "text"],
+        template=refine_template,
+    )
+
+    # Create the refine chain
+    chain = load_summarize_chain(
+        llm,
+        chain_type="refine",
+        return_intermediate_steps=True,
+        question_prompt=PROMPT,
+        refine_prompt=refine_prompt,
+    )
+
+    # Run the chain and return the summarized minutes
+    resp = chain({"input_documents": docs}, return_only_outputs=True)
+    return resp["output_text"]
+
+
+print(minutes_meet("""
 Meeting Transcript
 
 John: Good morning, everyone. I hope you all had a great weekend. Let’s get started with today’s meeting. We have several points to cover, including project updates, resource allocation, and upcoming deadlines. Before we dive in, let’s quickly go around the room and check in with everyone. Sarah, do you want to start?
@@ -163,61 +229,4 @@ Emily: Absolutely. I’ll do some research and present my findings in the next m
 
 John: Sounds good. Alright, if there’s nothing else, let’s wrap up. Thanks, everyone, for your input and updates. Let’s stay on top of our action items, and I’ll see you all in our next meeting.
 
-"""
-
-# with open("record.txt", "r") as f:
-#     raw_text = f.read()
-    # Split the source text
-text_splitter = CharacterTextSplitter(
-    chunk_size=chunk_size,
-    chunk_overlap=chunk_overlap,
-    length_function=len,
-)
-texts = text_splitter.split_text(
-    source_text,
-)
-
-# Create Document objects for the texts
-docs = [Document(page_content=t) for t in texts[:]]
-
-# openaichat = OpenAIChat(temperature=0, model="gpt-4o-mini", api_key=openai_api_key)
-llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=openai_api_key)
-prompt_template = """Act as a professional technical meeting minutes writer. 
-Tone: formal
-Format: Technical meeting summary
-Length:  200 ~ 300
-Tasks:
-- highlight action items and owners
-- highlight the agreements
-- Use bullet points if needed
-{text}
-CONCISE SUMMARY IN ENGLISH:"""
-PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-refine_template = (
-    "Your job is to produce a final summary\n"
-    "We have provided an existing summary up to a certain point: {existing_answer}\n"
-    "We have the opportunity to refine the existing summary"
-    "(only if needed) with some more context below.\n"
-    "------------\n"
-    "{text}\n"
-    "------------\n"
-    f"Given the new context, refine the original summary in English within {target_len} words: following the format"
-    "Participants: <participants>"
-    "Discussed: <Discussed-items>"
-    "Follow-up actions: <a-list-of-follow-up-actions-with-owner-names>"
-    "If the context isn't useful, return the original summary. Highlight agreements and follow-up actions and owners."
-)
-refine_prompt = PromptTemplate(
-    input_variables=["existing_answer", "text"],
-    template=refine_template,
-)
-chain = load_summarize_chain(
-    llm,
-    chain_type="refine",
-    return_intermediate_steps=True,
-    question_prompt=PROMPT,
-    refine_prompt=refine_prompt,
-)
-resp = chain({"input_documents": docs}, return_only_outputs=True)
-
-print(resp["output_text"])
+"""))
