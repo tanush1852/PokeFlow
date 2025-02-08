@@ -11,6 +11,7 @@ from llm_models import LLMModelInterface
 from notion_client import Client
 from dotenv import load_dotenv
 from meet import minutes_meet
+from docs import store_markdown_to_gdoc
 
 from flask import Flask, request, jsonify
 from playwright.async_api import async_playwright
@@ -216,6 +217,7 @@ def minutes_of_meet():
     data = request.get_json()
     meet_data = data['meet_data']
     minutes = minutes_meet(meet_data)
+    document_id = store_markdown_to_gdoc(minutes, doc_title="Minutes of Meeting")
     return jsonify({
         'status': 'success',
         'data': minutes
