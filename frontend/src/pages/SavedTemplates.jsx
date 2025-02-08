@@ -13,7 +13,7 @@ const IntegratedInterface = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [credentials, setCredentials] = useState({});
   const [selectedFile, setSelectedFile] = useState({});
-  const [activeTab, setActiveTab] = useState('templates'); // 'templates' or 'apps'
+  const [activeTab, setActiveTab] = useState('templates');
 
   const apps = [
     { 
@@ -28,7 +28,12 @@ const IntegratedInterface = () => {
       name: 'Gmail', 
       icon: Mail, 
       color: '#EA4335',
-      description: 'Process emails, tasks, and attachments'
+      description: 'Process emails, tasks, and attachments',
+      validConnections: {
+        tasks: [6], // Notion ID
+        meet: [5], // Notion ID
+        attachments: [4] // Google Drive ID
+      }
     },
     { 
       id: 3, 
@@ -119,20 +124,35 @@ const IntegratedInterface = () => {
           color: '#34A853'
         }
       ]
-    }
+    },
+    {
+        id: 4,
+        name: "Gmail Meet to Sheets",  // Changed name
+        description: "Save meeting details from Gmail to Sheets", // Changed description
+        apps: [
+          { 
+            id: 2, 
+            name: 'Gmail', 
+            icon: Mail, 
+            color: '#EA4335',
+            presetOptions: { meet: true }
+          },
+          { 
+            id: 5, // Changed to Sheets
+            name: 'Google Sheets', 
+            icon: FileSpreadsheet, 
+            color: '#34A853'
+          }
+        ]}
   ];
 
   const handleTemplateSelect = (template) => {
-    // Clear existing apps and states
     setDroppedApps([]);
     setSelectedOptions({});
     setCredentials({});
     setSelectedFile({});
-
-    // Add template apps
     setDroppedApps(template.apps);
 
-    // Set any preset options
     template.apps.forEach(app => {
       if (app.presetOptions) {
         setSelectedOptions(prev => ({
@@ -142,17 +162,15 @@ const IntegratedInterface = () => {
       }
     });
 
-    // Switch to apps view
     setActiveTab('apps');
   };
 
   const handleOptionChange = (appId, option) => {
+    const newOptions = {};
+    newOptions[option] = !selectedOptions[appId]?.[option];
     setSelectedOptions({
       ...selectedOptions,
-      [appId]: {
-        ...selectedOptions[appId],
-        [option]: !selectedOptions[appId]?.[option]
-      }
+      [appId]: newOptions
     });
   };
 
@@ -184,9 +202,21 @@ const IntegratedInterface = () => {
 
   const handleDrop = (e) => {
     e.preventDefault();
-    if (draggedApp && !droppedApps.find(app => app.id === draggedApp.id)) {
-      setDroppedApps([...droppedApps, draggedApp]);
+    if (!draggedApp) return;
+  
+    if (droppedApps.find(app => app.id === draggedApp.id)) return;
+  
+    const gmailApp = droppedApps.find(app => app.id === 2);
+    const gmailOptions = gmailApp ? selectedOptions[2] || {} : {};
+  
+    if (gmailApp) {
+      const validConnections = apps.find(a => a.id === 2).validConnections;
+      if (gmailOptions.tasks && draggedApp.id !== 6) return;
+      if (gmailOptions.meet && draggedApp.id !== 5) return; // Changed to 5 for Sheets
+      if (gmailOptions.attachments && draggedApp.id !== 4) return;
     }
+  
+    setDroppedApps([...droppedApps, draggedApp]);
     setDraggedApp(null);
   };
 
@@ -195,6 +225,28 @@ const IntegratedInterface = () => {
     setSelectedOptions({ ...selectedOptions, [appId]: {} });
     setCredentials({ ...credentials, [appId]: {} });
     setSelectedFile({ ...selectedFile, [appId]: null });
+  };
+
+  const isValidConfiguration = () => {
+    const gmailApp = droppedApps.find(app => app.id === 2);
+    if (!gmailApp) return true;
+  
+    const gmailOptions = selectedOptions[2] || {};
+    const hasGmailOption = Object.values(gmailOptions).some(val => val);
+    
+    if (!hasGmailOption) return true;
+    
+    if (gmailOptions.tasks) {
+      return droppedApps.some(app => app.id === 6);
+    }
+    if (gmailOptions.meet) {
+      return droppedApps.some(app => app.id === 5); // Changed to check for Sheets
+    }
+    if (gmailOptions.attachments) {
+      return droppedApps.some(app => app.id === 4);
+    }
+    
+    return true;
   };
 
   const renderAppOptions = (app) => {
@@ -228,7 +280,7 @@ const IntegratedInterface = () => {
       case 'Gmail':
         return (
           <div className="space-y-3">
-            {['loadMails', 'tasks', 'attachments'].map(option => (
+            {['tasks', 'meet', 'attachments'].map(option => (
               <label key={option} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -359,7 +411,7 @@ const IntegratedInterface = () => {
                     ? darkMode 
                       ? 'bg-blue-600 text-white'
                       : 'bg-blue-500 text-white'
-                    : darkMode
+                      : darkMode
                       ? 'text-gray-400 hover:text-white'
                       : 'text-gray-600 hover:text-gray-900'
                 }`}
@@ -538,10 +590,13 @@ const IntegratedInterface = () => {
                   ))}
                   <button
                     onClick={handleSubmit}
+                    disabled={!isValidConfiguration()}
                     className={`w-full py-3 rounded-lg ${
-                      darkMode
-                        ? 'bg-blue-600 hover:bg-blue-700'
-                        : 'bg-blue-500 hover:bg-blue-600'
+                      !isValidConfiguration()
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : darkMode
+                          ? 'bg-blue-600 hover:bg-blue-700'
+                          : 'bg-blue-500 hover:bg-blue-600'
                     } text-white font-medium transition-colors`}
                   >
                     Process Integration
