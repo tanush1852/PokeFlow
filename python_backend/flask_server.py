@@ -10,7 +10,8 @@ from googleapiclient.errors import HttpError
 from llm_models import LLMModelInterface
 from notion_client import Client
 from dotenv import load_dotenv
-
+from meet import minutes_meet
+from docs import store_markdown_to_gdoc
 
 from flask import Flask, request, jsonify
 from playwright.async_api import async_playwright
@@ -158,58 +159,69 @@ def is_primary_inbox_email(service, user_id, msg_id):
         print(f"An error occurred checking labels: {error}")
         return False
 
-# @app.route('/api/emails', methods=['GET'])
-# def get_mails():
-#     try:
-#         # Get Gmail service
-#         service = get_gmail_service()
+@app.route('/api/emails', methods=['GET'])
+def get_mails():
+    try:
+        # Get Gmail service
+        service = get_gmail_service()
         
-#         # Search for unread emails with primary inbox filter
-#         results = service.users().messages().list(
-#             userId='me',
-#             q='is:unread category:primary',  # Add category:primary to filter
-#             maxResults=20
-#         ).execute()
+        # Search for unread emails with primary inbox filter
+        results = service.users().messages().list(
+            userId='me',
+            q='is:unread category:primary',  # Add category:primary to filter
+            maxResults=20
+        ).execute()
         
-#         messages = results.get('messages', [])
+        messages = results.get('messages', [])
         
-#         if not messages:
-#             return jsonify({
-#                 'status': 'success',
-#                 'message': 'No unread messages found in primary inbox',
-#                 'data': []
-#             }), 200
+        if not messages:
+            return jsonify({
+                'status': 'success',
+                'message': 'No unread messages found in primary inbox',
+                'data': []
+            }), 200
             
-#         # Process each message
-#         emails = []
-#         for message in messages:
-#             # Double-check if the message is in primary inbox
-#             if is_primary_inbox_email(service, 'me', message['id']):
-#                 subject, content = get_email_content(service, 'me', message['id'])
-#                 if subject and content:
-#                     # Clean the content - remove excessive newlines and spaces
-#                     content = ' '.join(content.split())
-#                     emails.append({
-#                         'subject': subject,
-#                         'content': content,
-#                         'id': message['id']
-#                     })
+        # Process each message
+        emails = []
+        for message in messages:
+            # Double-check if the message is in primary inbox
+            if is_primary_inbox_email(service, 'me', message['id']):
+                subject, content = get_email_content(service, 'me', message['id'])
+                if subject and content:
+                    # Clean the content - remove excessive newlines and spaces
+                    content = ' '.join(content.split())
+                    emails.append({
+                        'subject': subject,
+                        'content': content,
+                        'id': message['id']
+                    })
                     
-#                     # Break if we've found 10 primary inbox emails
-#                     if len(emails) >= 10:
-#                         break
+                    # Break if we've found 10 primary inbox emails
+                    if len(emails) >= 10:
+                        break
         
-#         return jsonify({
-#             'status': 'success',
-#             'message': f'Found {len(emails)} unread primary inbox emails',
-#             'data': emails
-#         }), 200
+        return jsonify({
+            'status': 'success',
+            'message': f'Found {len(emails)} unread primary inbox emails',
+            'data': emails
+        }), 200
 
-#     except HttpError as error:
-#         return jsonify({
-#             'status': 'error',
-#             'message': str(error)
-#         }), 500
+    except HttpError as error:
+        return jsonify({
+            'status': 'error',
+            'message': str(error)
+        }), 500
+
+@app.route('/api/minutes_meet', methods=['POST'])
+def minutes_of_meet():
+    data = request.get_json()
+    meet_data = data['meet_data']
+    minutes = minutes_meet(meet_data)
+    document_id = store_markdown_to_gdoc(minutes, doc_title="Minutes of Meeting")
+    return jsonify({
+        'status': 'success',
+        'data': minutes
+    }), 200
     
 @app.route('/api/extract_meets', methods=['GET'])
 def extract_meets():
@@ -267,7 +279,7 @@ def extract_meets():
           {{
             "meet_title": "A short name",
             "description": "A brief description",
-            "start_time": "A realistic date **only** in the date format dd/mm/yyyThh:mm or 'None'"
+            "start_time": "A realistic date *only* in the date format dd/mm/yyyThh:mm or 'None'"
           }}
         ]
         If the email does not describe a meet, return an empty list. Return only the JSON no text following or preceding it.
@@ -345,7 +357,7 @@ def extract_meets():
 #           {{
 #             "task_name": "A short name",
 #             "description": "A brief description",
-#             "deadline": "A realistic date **only** in the date format dd/mm/yyy or 'None'"
+#             "deadline": "A realistic date *only* in the date format dd/mm/yyy or 'None'"
 #           }}
 #         ]
 #         If the email does not describe a work-related task, return an empty list. Return only the JSON no text following or preceding it.
@@ -423,7 +435,7 @@ def send_tasks_notion():
           {{
             "task_name": "A short name",
             "description": "A brief description",
-            "deadline": "A realistic date **only** in the date format dd/mm/yyy or 'None'"
+            "deadline": "A realistic date *only* in the date format dd/mm/yyy or 'None'"
           }}
         ]
         If the email does not describe a work-related task, return an empty list. Return only the JSON no text following or preceding it.
@@ -440,11 +452,11 @@ def send_tasks_notion():
             "content": content, 
             "tasks": result 
         })
-        print(results)
+        # print(results)
         list_of_tasks = []
         import json
         parsed_tasks = json.loads(result)
-        print(parsed_tasks)
+        # print(parsed_tasks)
         for task in parsed_tasks:
 
             task_name = task.get('task_name', '')
@@ -518,7 +530,7 @@ def send_meets_notion():
           {{
             "meet_title": "A short name",
             "description": "A brief description",
-            "start_time": "A realistic date **only** in the date format dd/mm/yyyThh:mm or 'None'"
+            "start_time": "A realistic date *only* in the date format dd/mm/yyyThh:mm or 'None'"
           }}
         ]
         If the email does not describe a meet, return an empty list. Return only the JSON no text following or preceding it.
@@ -536,11 +548,11 @@ def send_meets_notion():
             "meet": result 
         })
 
-        # print(results)
+        print(results)
         list_of_tasks = []
         import json
         parsed_tasks = json.loads(result)
-        # print(parsed_tasks)
+        print(parsed_tasks)
         for task in parsed_tasks:
 
             task_name = task.get('meet_title', '')
