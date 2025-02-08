@@ -48,16 +48,10 @@ def get_or_create_notion_database():
             parent={"page_id": NOTION_PAGE_ID},
             title=[{"text": {"content": "Email Tasks"}}],
             properties={
-                "Task": {"title": {}},
-                "Status": {
-                    "select": {
-                        "options": [
-                            {"name": "To Do", "color": "red"},
-                            {"name": "In Progress", "color": "yellow"},
-                            {"name": "Done", "color": "green"},
-                        ]
-                    }
-                }
+                "Task Name": {"title": {}},
+                "Description": {"rich_text": {}},
+                "Deadline": {"date": {}},
+                "Completed": {"checkbox": {}}
             },
         )
         logging.info(f"Created new Notion database: {database['id']}")
@@ -78,8 +72,10 @@ def add_tasks_to_notion(database_id, tasks):
             notion.pages.create(
                 parent={"database_id": database_id},
                 properties={
-                    "Task": {"title": [{"text": {"content": task}}]},
-                    "Status": {"select": {"name": "To Do"}},
+                    "Task Name": {"title": [{"text": {"content": task['task_name']}}]},
+                    "Description": {"rich_text": [{"text": {"content": task['description']}}]},
+                    "Deadline": {"date": {"start": task['deadline']}},
+                    "Completed": {"checkbox": False}
                 },
             )
         logging.info(f"Successfully added {len(tasks)} tasks to Notion.")
@@ -308,11 +304,11 @@ def send_tasks_notion():
         parsed_tasks = json.loads(result)
         print(parsed_tasks)
         for task in parsed_tasks:
-
-            task_name = task.get('task_name', '')
-            description = task.get('description', '')
-            deadline = task.get('deadline', '')
-            list_of_tasks.append(f"Task: {task_name}\nDescription: {description}\nDeadline: {deadline}")
+            list_of_tasks.append({
+                "task_name": task.get('task_name', ''),
+                "description": task.get('description', ''),
+                "deadline": task.get('deadline', '')
+            })
 
         # Get or create Notion database
 
