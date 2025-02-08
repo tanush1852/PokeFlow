@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 
 
 from flask import Flask, request, jsonify
+from playwright.async_api import async_playwright
+import asyncio
+import nest_asyncio
 from functools import wraps
 import logging
 from datetime import datetime
@@ -48,10 +51,16 @@ def get_or_create_notion_database():
             parent={"page_id": NOTION_PAGE_ID},
             title=[{"text": {"content": "Email Tasks"}}],
             properties={
-                "Task Name": {"title": {}},
-                "Description": {"rich_text": {}},
-                "Deadline": {"date": {}},
-                "Completed": {"checkbox": {}}
+                "Task": {"title": {}},
+                "Status": {
+                    "select": {
+                        "options": [
+                            {"name": "To Do", "color": "red"},
+                            {"name": "In Progress", "color": "yellow"},
+                            {"name": "Done", "color": "green"},
+                        ]
+                    }
+                }
             },
         )
         logging.info(f"Created new Notion database: {database['id']}")
@@ -72,10 +81,8 @@ def add_tasks_to_notion(database_id, tasks):
             notion.pages.create(
                 parent={"database_id": database_id},
                 properties={
-                    "Task Name": {"title": [{"text": {"content": task['task_name']}}]},
-                    "Description": {"rich_text": [{"text": {"content": task['description']}}]},
-                    "Deadline": {"date": {"start": task['deadline']}},
-                    "Completed": {"checkbox": False}
+                    "Task": {"title": [{"text": {"content": task}}]},
+                    "Status": {"select": {"name": "To Do"}},
                 },
             )
         logging.info(f"Successfully added {len(tasks)} tasks to Notion.")
@@ -139,6 +146,9 @@ def is_primary_inbox_email(service, user_id, msg_id):
         # Get the full message to check its labels
         message = service.users().messages().get(userId=user_id, id=msg_id).execute()
         labels = message.get('labelIds', [])
+        
+        # Check if the email has CATEGORY_PERSONAL or INBOX label
+        # and doesn't have CATEGORY_PROMOTIONS or CATEGORY_SOCIAL
         is_primary = ('CATEGORY_PERSONAL' in labels or 'INBOX' in labels) and \
                     'CATEGORY_PROMOTIONS' not in labels and \
                     'CATEGORY_SOCIAL' not in labels
@@ -147,6 +157,59 @@ def is_primary_inbox_email(service, user_id, msg_id):
     except Exception as error:
         print(f"An error occurred checking labels: {error}")
         return False
+
+# @app.route('/api/emails', methods=['GET'])
+# def get_mails():
+#     try:
+#         # Get Gmail service
+#         service = get_gmail_service()
+        
+#         # Search for unread emails with primary inbox filter
+#         results = service.users().messages().list(
+#             userId='me',
+#             q='is:unread category:primary',  # Add category:primary to filter
+#             maxResults=20
+#         ).execute()
+        
+#         messages = results.get('messages', [])
+        
+#         if not messages:
+#             return jsonify({
+#                 'status': 'success',
+#                 'message': 'No unread messages found in primary inbox',
+#                 'data': []
+#             }), 200
+            
+#         # Process each message
+#         emails = []
+#         for message in messages:
+#             # Double-check if the message is in primary inbox
+#             if is_primary_inbox_email(service, 'me', message['id']):
+#                 subject, content = get_email_content(service, 'me', message['id'])
+#                 if subject and content:
+#                     # Clean the content - remove excessive newlines and spaces
+#                     content = ' '.join(content.split())
+#                     emails.append({
+#                         'subject': subject,
+#                         'content': content,
+#                         'id': message['id']
+#                     })
+                    
+#                     # Break if we've found 10 primary inbox emails
+#                     if len(emails) >= 10:
+#                         break
+        
+#         return jsonify({
+#             'status': 'success',
+#             'message': f'Found {len(emails)} unread primary inbox emails',
+#             'data': emails
+#         }), 200
+
+#     except HttpError as error:
+#         return jsonify({
+#             'status': 'error',
+#             'message': str(error)
+#         }), 500
     
 @app.route('/api/extract_meets', methods=['GET'])
 def extract_meets():
@@ -226,6 +289,85 @@ def extract_meets():
         "status": "success",
         "data": results
     }), 200
+    
+# @app.route('/api/extract_tasks', methods=['GET'])
+# def extract_tasks():
+#     # print("Extracting tasks from emails...")
+#     service = get_gmail_service()
+    
+#     results = service.users().messages().list(
+#         userId='me',
+#         q='is:unread category:primary',
+#         maxResults=20
+#     ).execute()
+    
+#     messages = results.get('messages', [])
+    
+#     if not messages:
+#         return jsonify({
+#             'status': 'success',
+#             'message': 'No unread messages found in primary inbox',
+#             'data': []
+#         }), 200
+        
+#     # Process each message
+#     emails = []
+#     for message in messages:
+#         # Double-check if the message is in primary inbox
+#         if is_primary_inbox_email(service, 'me', message['id']):
+#             subject, content = get_email_content(service, 'me', message['id'])
+#             if subject and content:
+#                 # Clean the content - remove excessive newlines and spaces
+#                 content = ' '.join(content.split())
+#                 emails.append({
+#                     'subject': subject,
+#                     'content': content,
+#                     'id': message['id']
+#                 })
+                
+#                 # Break if we've found 10 primary inbox emails
+#                 if len(emails) >= 3:
+#                     break
+#     api_key = "AIzaSyDyS3MDtriKTOr0dSSbjj6dAacbqEe2wuU"  # Replace with your Gemini API key
+#     results = []
+
+#     for email in emails:
+#         subject = email.get('subject', '')
+#         content = email.get('content', '')
+
+#         prompt_template = f"""
+#         You are an AI that extracts potential work-related tasks from emails.
+#         Email Subject: {subject}
+#         Email Content: {content}
+        
+#         If the email describes a work-related task, return a JSON list of objects with:
+#         [
+#           {{
+#             "task_name": "A short name",
+#             "description": "A brief description",
+#             "deadline": "A realistic date **only** in the date format dd/mm/yyy or 'None'"
+#           }}
+#         ]
+#         If the email does not describe a work-related task, return an empty list. Return only the JSON no text following or preceding it.
+#         """
+#         gemini_result = llm_interface.call_gemini(prompt_template, api_key, disable_parse=True)
+#         if "[" in gemini_result and "]" in gemini_result:
+#             start = gemini_result.find("[")
+#             end = gemini_result.rfind("]") + 1
+#             result = gemini_result[start:end]
+#         else:
+#             raise ValueError("Model did not return a valid dictionary.")
+#         results.append({ 
+#             "subject": subject, 
+#             "content": content, 
+#             "tasks": result 
+#         })
+
+#     return jsonify({
+#         "status": "success",
+#         "data": results
+#     }), 200
+
 
 @app.route('/api/send_tasks_notion', methods=['GET'])
 def send_tasks_notion():
@@ -304,11 +446,11 @@ def send_tasks_notion():
         parsed_tasks = json.loads(result)
         print(parsed_tasks)
         for task in parsed_tasks:
-            list_of_tasks.append({
-                "task_name": task.get('task_name', ''),
-                "description": task.get('description', ''),
-                "deadline": task.get('deadline', '')
-            })
+
+            task_name = task.get('task_name', '')
+            description = task.get('description', '')
+            deadline = task.get('deadline', '')
+            list_of_tasks.append(f"Task: {task_name}\nDescription: {description}\nDeadline: {deadline}")
 
         # Get or create Notion database
 
