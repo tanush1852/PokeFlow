@@ -1,5 +1,1 @@
 flask
-redis
-pymongo
-openai
-sentence-transformers
