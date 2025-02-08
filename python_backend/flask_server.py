@@ -14,7 +14,6 @@ from meet import minutes_meet
 from docs import store_markdown_to_gdoc
 
 from flask import Flask, request, jsonify
-from playwright.async_api import async_playwright
 import asyncio
 import logging
 import nest_asyncio
