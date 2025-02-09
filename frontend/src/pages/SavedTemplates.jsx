@@ -484,7 +484,7 @@ const IntegratedInterface = () => {
           if (options.attachments) {
             try {
               const response = await axios.get(
-                "http://localhost:5000/api/attachments",
+                "http://localhost:5000//api/save_attachments_drive",
               );
               console.log("Attachments loaded:", response.data);
               toast.success(`Successfully processed attachments from Gmail`);
@@ -511,6 +511,19 @@ const IntegratedInterface = () => {
           } catch (error) {
             console.error("Error loading LinkedIn data:", error);
             toast.error(`Failed to process LinkedIn data: ${error.message}`);
+          }
+          break;
+        
+        case "Google Meet":
+          try {
+            const response = await axios.post("http://localhost:5000/api/minutes_meet", {
+              meet_data: "Your meeting transcript or relevant data here"
+            });
+            console.log("Minutes of meeting loaded:", response.data);
+            toast.success("Successfully processed Google Meet data");
+          } catch (error) {
+            console.error("Error processing meeting data:", error);
+            toast.error(`Failed to process meeting data: ${error.message}`);
           }
           break;
 

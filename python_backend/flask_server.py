@@ -636,7 +636,8 @@ def send_tasks_notion():
             "deadline": "A realistic date *only* in the date format dd/mm/yyy or 'None'"
           }}
         ]
-        If the email does not describe a work-related task, return an empty list. Return only the JSON no text following or preceding it.
+        If the email does not describe a
+          task, return an empty list. Return only the JSON no text following or preceding it.
         """
         gemini_result = llm_interface.call_gemini(prompt_template, api_key, disable_parse=True)
         if "[" in gemini_result and "]" in gemini_result:
