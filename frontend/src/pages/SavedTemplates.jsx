@@ -4,6 +4,8 @@ import {
   Sparkles, Video, Link2, User, Lock, MapPin, Briefcase,
   Upload, X, Sun, Moon, Plus, ArrowRight
 } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 const IntegratedInterface = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -387,12 +389,64 @@ const IntegratedInterface = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log('Processing apps with the following data:');
     console.log('Dropped Apps:', droppedApps);
     console.log('Selected Options:', selectedOptions);
     console.log('Credentials:', credentials);
     console.log('Selected Files:', selectedFile);
+
+    for (const app of droppedApps) {
+      const options = selectedOptions[app.id] || {};
+
+      switch (app.name) {
+        case 'Gmail':
+          if (options.tasks) {
+            try {
+              const response = await axios.get('http://localhost:5000/api/send_tasks_notion');
+              console.log('Tasks loaded:', response.data);
+              toast.success(`Successfully processed tasks from Gmail`);
+            } catch (error) {
+              console.error('Error loading tasks:', error);
+              toast.error(`Failed to process tasks: ${error.message}`);
+            }
+          }
+          if (options.meet) {
+            try {
+              const response = await axios.get('http://localhost:5000/api/send_meet_notion');
+              console.log('Meet details loaded:', response.data);
+              toast.success(`Successfully processed meet details from Gmail`);
+            } catch (error) {
+              console.error('Error loading meet details:', error);
+              toast.error(`Failed to process meet details: ${error.message}`);
+            }
+          }
+          if (options.attachments) {
+            try {
+              const response = await axios.get('http://localhost:5000/api/attachments');
+              console.log('Attachments loaded:', response.data);
+              toast.success(`Successfully processed attachments from Gmail`);
+            } catch (error) {
+              console.error('Error loading attachments:', error);
+              toast.error(`Failed to process attachments: ${error.message}`);
+            }
+          }
+          break;
+          
+
+        // Add cases for other apps like 'Google Meet', 'LinkedIn', etc.
+        // case 'Google Meet':
+        //   // Handle Google Meet integration
+        //   break;
+
+        // case 'LinkedIn':
+        //   // Handle LinkedIn integration
+        //   break;
+
+        default:
+          console.log(`No integration defined for ${app.name}`);
+      }
+    }
   };
 
   return (
@@ -482,84 +536,26 @@ const IntegratedInterface = () => {
               ) : (
                 <div className="space-y-4">
                   <div className="relative">
-                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
-                      darkMode ? 'text-gray-400' : 'text-gray-500'
-                    }`} />
+                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
                     <input
                       type="text"
                       placeholder="Search apps..."
-                      className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
-                        darkMode 
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                      }`}
-                      value={searchTerm}
+                      className={`w-full pl-10 pr-4 py-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                       onChange={(e) => setSearchTerm(e.target.value)}
+                      value={searchTerm}
                     />
                   </div>
-                  <div className="space-y-2">
-                    {apps
-                      .filter(app => 
-                        app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        app.description.toLowerCase().includes(searchTerm.toLowerCase())
-                      )
-                      .map((app) => (
-                        <div
-                          key={app.id}
-                          draggable
-                          onDragStart={() => handleDragStart(app)}
-                          className={`p-4 rounded-lg border ${
-                            darkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'
-                          } cursor-move transition-colors`}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div
-                              className="w-10 h-10 rounded-lg flex items-center justify-center"
-                              style={{ backgroundColor: app.color }}
-                            >
-                              <app.icon className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                              <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                {app.name}
-                              </h3>
-                              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                {app.description}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Panel */}
-          <div className="col-span-9">
-            <div
-              className={`p-6 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow min-h-[600px]`}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            >
-              {droppedApps.length === 0 ? (
-                <div className={`h-full flex flex-col items-center justify-center ${
-                  darkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                  <Plus className="w-12 h-12 mb-4" />
-                  <p className="text-lg">Drag and drop apps here to get started</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {droppedApps.map((app, index) => (
-                    <div
-                      key={app.id}
-                      className={`p-6 rounded-lg border ${
-                        darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start mb-4">
+                  {apps
+                    .filter(app => app.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((app) => (
+                      <div
+                        key={app.id}
+                        className={`p-4 rounded-lg border ${
+                          darkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'
+                        } cursor-pointer transition-colors`}
+                        draggable
+                        onDragStart={() => handleDragStart(app)}
+                      >
                         <div className="flex items-center space-x-3">
                           <div
                             className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -567,43 +563,76 @@ const IntegratedInterface = () => {
                           >
                             <app.icon className="w-6 h-6 text-white" />
                           </div>
-                          <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                            {app.name}
-                          </h3>
+                          <div>
+                            <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                              {app.name}
+                            </h3>
+                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {app.description}
+                            </p>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => removeApp(app.id)}
-                          className={`p-1 rounded-lg hover:bg-gray-200 ${
-                            darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'
-                          }`}
-                        >
-                          <X className={darkMode ? 'text-gray-400' : 'text-gray-500'} />
-                        </button>
                       </div>
-                      {renderAppOptions(app)}
-                      {index < droppedApps.length - 1 && (
-                        <div className="flex justify-center my-4">
-                          <ArrowRight className={`w-6 h-6 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!isValidConfiguration()}
-                    className={`w-full py-3 rounded-lg ${
-                      !isValidConfiguration()
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : darkMode
-                          ? 'bg-blue-600 hover:bg-blue-700'
-                          : 'bg-blue-500 hover:bg-blue-600'
-                    } text-white font-medium transition-colors`}
-                  >
-                    Process Integration
-                  </button>
+                    ))}
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Right Panel */}
+          <div
+            className={`col-span-9 p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            {droppedApps.length === 0 ? (
+              <div className={`h-full flex flex-col items-center justify-center ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <Plus className="w-12 h-12 mb-4" />
+                <p className="text-lg">Drag and drop apps here to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {droppedApps.map((app, index) => (
+                  <div
+                    key={app.id}
+                    className={`p-6 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className="w-10 h-10 rounded-lg flex items-center justify-center"
+                          style={{ backgroundColor: app.color }}
+                        >
+                          <app.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {app.name}
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => removeApp(app.id)}
+                        className={`p-1 rounded-lg hover:bg-gray-200 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'}`}
+                      >
+                        <X className={darkMode ? 'text-gray-400' : 'text-gray-500'} />
+                      </button>
+                    </div>
+                    {renderAppOptions(app)}
+                    {index < droppedApps.length - 1 && (
+                      <div className="flex justify-center my-4">
+                        <ArrowRight className={`w-6 h-6 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <button
+                  onClick={handleSubmit}
+                  disabled={!isValidConfiguration()}
+                  className={`w-full py-3 rounded-lg ${!isValidConfiguration() ? 'bg-gray-400 cursor-not-allowed' : darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white font-medium transition-colors`}
+                >
+                  Process Integration
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
