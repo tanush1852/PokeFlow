@@ -31,7 +31,7 @@ import {
 import GoogleSignInDialog from "@/pages/Googledialog";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
+const ICON_SIZE = 24;
 const IntegratedInterface = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [draggedApp, setDraggedApp] = useState(null);
@@ -72,7 +72,7 @@ const IntegratedInterface = () => {
       description: "Process emails, tasks, and attachments",
       validConnections: {
         tasks: [6], // Notion ID
-        meet: [5], // Notion ID
+        meet: [6], // Notion ID
         attachments: [4], // Google Drive ID
       },
     },
@@ -92,7 +92,7 @@ const IntegratedInterface = () => {
     },
     {
       id: 5,
-      name: "Google Sheets",
+      name: "Google Docs",
       icon: FileSpreadsheet,
       color: "#34A853",
       description: "Analyze and visualize data",
@@ -118,7 +118,7 @@ const IntegratedInterface = () => {
           name: "Gmail",
           icon: Mail,
           color: "#EA4335",
-          presetOptions: { tasks: true },
+          presetOptions: { tasks: true}, 
         },
         {
           id: 6,
@@ -150,9 +150,9 @@ const IntegratedInterface = () => {
     },
     {
       id: 3,
-      name: "Meet Summary to Sheets",
+      name: "Meet Summary to Docs",
       description:
-        "Summarize meeting transcripts and save them to Google Sheets",
+        "Summarize meeting transcripts and save them to Google Docs",
       apps: [
         {
           id: 1,
@@ -162,7 +162,7 @@ const IntegratedInterface = () => {
         },
         {
           id: 5,
-          name: "Google Sheets",
+          name: "Google Docs",
           icon: FileSpreadsheet,
           color: "#34A853",
         },
@@ -170,7 +170,7 @@ const IntegratedInterface = () => {
     },
     {
       id: 4,
-      name: "Gmail Meet to Sheets", // Changed name
+      name: "Gmail Meet to Doc", // Changed name
       description: "Save meeting details from Gmail to Sheets", // Changed description
       apps: [
         {
@@ -182,7 +182,7 @@ const IntegratedInterface = () => {
         },
         {
           id: 5, // Changed to Sheets
-          name: "Google Sheets",
+          name: "Google Docs",
           icon: FileSpreadsheet,
           color: "#34A853",
         },
@@ -252,12 +252,49 @@ const IntegratedInterface = () => {
 
     const gmailApp = droppedApps.find((app) => app.id === 2);
     const gmailOptions = gmailApp ? selectedOptions[2] || {} : {};
+    const meetApp=droppedApps.find((app) => app.id === 1);
+    const LinkedInapp=droppedApps.find((app) => app.id === 3);
+    const googledriveapp=droppedApps.find((app) => app.id === 4);
+    const docsapp=droppedApps.find((app) => app.id === 5);
+    const notionapp=droppedApps.find((app) => app.id === 6);
+    if(meetApp){
+        const validConnections = apps.find((a) => a.id === 1).validConnections;
+        if (meetApp && draggedApp.id !== 5) return;
+    }
+    if(googledriveapp){
+       
+        if (googledriveapp && draggedApp.id !== 5) return;
+        if (googledriveapp && draggedApp.id !== 6) return;
+        if (googledriveapp && draggedApp.id !== 1) return;
+        if (googledriveapp && draggedApp.id !== 2) return;
+        if (googledriveapp && draggedApp.id !== 3) return;
+    }
+    if(docsapp){
+       
+        if (docsapp && draggedApp.id !== 6) return;
+        if (docsapp && draggedApp.id !== 4) return;
+        if (docsapp && draggedApp.id !== 3) return;
+        if (docsapp && draggedApp.id !== 2) return;
+        if (docsapp && draggedApp.id !== 1) return;
+    }
+    if(notionapp){
+        if (notionapp && draggedApp.id !== 1) return;
+        if (notionapp && draggedApp.id !== 2) return;
+        if (notionapp && draggedApp.id !== 3) return;
+        if (notionapp && draggedApp.id !== 4) return;
+        if (notionapp && draggedApp.id !== 5) return;
+    }
 
     if (gmailApp) {
       const validConnections = apps.find((a) => a.id === 2).validConnections;
       if (gmailOptions.tasks && draggedApp.id !== 6) return;
-      if (gmailOptions.meet && draggedApp.id !== 5) return; // Changed to 5 for Sheets
+      if (gmailOptions.meet && draggedApp.id !== 6) return; // Changed to 5 for Sheets
       if (gmailOptions.attachments && draggedApp.id !== 4) return;
+
+    }
+    if(LinkedInapp)
+    {
+        if (LinkedInapp && draggedApp.id !== 5) return;
     }
 
     setDroppedApps([...droppedApps, draggedApp]);
@@ -284,7 +321,7 @@ const IntegratedInterface = () => {
       return droppedApps.some((app) => app.id === 6);
     }
     if (gmailOptions.meet) {
-      return droppedApps.some((app) => app.id === 5); // Changed to check for Sheets
+      return droppedApps.some((app) => app.id === 6); // Changed to check for Sheets
     }
     if (gmailOptions.attachments) {
       return droppedApps.some((app) => app.id === 4);
@@ -406,38 +443,19 @@ const IntegratedInterface = () => {
         );
 
       case "Google Drive":
-        return (
-          <div className="space-y-3">
-            <input
-              type="email"
-              placeholder="Gmail ID"
-              className={`w-full p-2 rounded border ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600 text-white"
-                  : "bg-white border-gray-300 text-gray-900"
-              }`}
-              onChange={(e) =>
-                handleCredentialChange(app.id, "email", e.target.value)
-              }
-              value={credentials[app.id]?.email || ""}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              className={`w-full p-2 rounded border ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600 text-white"
-                  : "bg-white border-gray-300 text-gray-900"
-              }`}
-              onChange={(e) =>
-                handleCredentialChange(app.id, "password", e.target.value)
-              }
-              value={credentials[app.id]?.password || ""}
-            />
+        const previApp =
+          droppedApps[droppedApps.findIndex((a) => a.id === app.id) - 1];
+        return previApp ? (
+          <div
+            className={`p-3 rounded ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}
+          >
+            <p className={darkMode ? "text-gray-300" : "text-gray-700"}>
+              Data from {previApp.name} will be stored in Google Drive
+            </p>
           </div>
-        );
+        ) : null;
 
-      case "Google Sheets":
+      case "Google Docs":
         const prevApp =
           droppedApps[droppedApps.findIndex((a) => a.id === app.id) - 1];
         return prevApp ? (
@@ -445,7 +463,7 @@ const IntegratedInterface = () => {
             className={`p-3 rounded ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}
           >
             <p className={darkMode ? "text-gray-300" : "text-gray-700"}>
-              Data from {prevApp.name} will be stored in Sheets
+              Data from {prevApp.name} will be stored in Docs
             </p>
           </div>
         ) : null;
