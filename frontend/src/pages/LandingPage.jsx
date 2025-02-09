@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,19 +16,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import GoogleSignInDialog from "@/pages/Googledialog";
 import { toast } from "sonner";
-import { 
-  ArrowRight, 
-  Grid, 
-  Zap, 
-  Shield, 
-  Clock, 
-  Users, 
-  Workflow, 
-  Code, 
-  LogOut, 
+import {
+  ArrowRight,
+  Grid,
+  Zap,
+  Shield,
+  Clock,
+  Users,
+  Workflow,
+  Code,
+  LogOut,
   ChevronDown,
   Braces,
-  Laptop
+  Laptop,
 } from "lucide-react";
 
 // Meteor Component
@@ -47,7 +53,7 @@ const Meteors = ({ number }) => {
             top: Math.floor(Math.random() * 100) + "%",
             left: Math.floor(Math.random() * 100) + "%",
             animationDelay: Math.random() * (0.8 - 0.2) + 0.2 + "s",
-            animationDuration: Math.floor(Math.random() * (10 - 2) + 2) + "s"
+            animationDuration: Math.floor(Math.random() * (10 - 2) + 2) + "s",
           }}
         >
           <div className="absolute h-0.5 w-[50px] -translate-y-[50%] bg-gradient-to-r from-slate-500 to-transparent" />
@@ -68,12 +74,12 @@ const MovingGradient = () => {
 
 const AppIcon = ({ icon, delay }) => {
   return (
-    <div 
+    <div
       className="absolute p-4 bg-white/10 backdrop-blur-md rounded-xl animate-float"
-      style={{ 
+      style={{
         animationDelay: `${delay}s`,
         left: `${Math.random() * 80 + 10}%`,
-        top: `${Math.random() * 80 + 10}%`
+        top: `${Math.random() * 80 + 10}%`,
       }}
     >
       {icon}
@@ -89,40 +95,46 @@ const LandingPage = () => {
   const features = [
     {
       title: "Automated Workflows",
-      description: "Create and manage complex workflows with our intuitive drag-and-drop interface",
+      description:
+        "Create and manage complex workflows with our intuitive drag-and-drop interface",
       icon: <Workflow className="w-12 h-12 text-blue-400" />,
-      stats: "500+ Templates"
+      stats: "500+ Templates",
     },
     {
       title: "Team Collaboration",
-      description: "Work together seamlessly with real-time updates and shared workspaces",
+      description:
+        "Work together seamlessly with real-time updates and shared workspaces",
       icon: <Users className="w-12 h-12 text-indigo-400" />,
-      stats: "10k+ Teams"
+      stats: "10k+ Teams",
     },
     {
       title: "Lightning Fast",
-      description: "Execute your workflows at unprecedented speeds with our optimized engine",
+      description:
+        "Execute your workflows at unprecedented speeds with our optimized engine",
       icon: <Zap className="w-12 h-12 text-cyan-400" />,
-      stats: "100ms Latency"
+      stats: "100ms Latency",
     },
     {
       title: "Enterprise Security",
-      description: "Bank-grade encryption and security protocols to protect your data",
+      description:
+        "Bank-grade encryption and security protocols to protect your data",
       icon: <Shield className="w-12 h-12 text-purple-400" />,
-      stats: "99.9% Uptime"
+      stats: "99.9% Uptime",
     },
     {
       title: "Time Saving",
-      description: "Reduce manual tasks and save countless hours with smart automation",
+      description:
+        "Reduce manual tasks and save countless hours with smart automation",
       icon: <Clock className="w-12 h-12 text-sky-400" />,
-      stats: "85% Time Saved"
+      stats: "85% Time Saved",
     },
     {
       title: "API Integration",
-      description: "Connect with your favorite tools through our extensive API ecosystem",
+      description:
+        "Connect with your favorite tools through our extensive API ecosystem",
       icon: <Code className="w-12 h-12 text-blue-400" />,
-      stats: "100+ Integrations"
-    }
+      stats: "100+ Integrations",
+    },
   ];
 
   useEffect(() => {
@@ -161,7 +173,7 @@ const LandingPage = () => {
       <div className="absolute inset-0">
         <Meteors number={20} />
       </div>
-      
+
       {/* Main Content */}
       <div className="relative z-10">
         {/* Navigation */}
@@ -176,20 +188,27 @@ const LandingPage = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/10">
-                    <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full ring-2 ring-blue-400" />
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 hover:bg-white/10"
+                  >
+                    <img
+                      src={user.picture}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full ring-2 ring-blue-400"
+                    />
                     <span>{user.name}</span>
                     <ChevronDown className="w-4 h-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-48 bg-gray-800 border-gray-700">
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={() => navigate("/savedTemplates")}
                     className="text-white hover:bg-gray-700"
                   >
                     Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={handleSignOut}
                     className="text-red-400 hover:text-red-300 hover:bg-gray-700"
                   >
@@ -199,7 +218,7 @@ const LandingPage = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button 
+              <Button
                 onClick={handleAuthClick}
                 className="px-6 py-2 text-lg bg-blue-600 hover:bg-blue-700 transition-colors"
               >
@@ -216,7 +235,7 @@ const LandingPage = () => {
               <div className="absolute inset-0 -z-10">
                 <Meteors number={10} />
               </div>
-                
+
               <h1 className="text-6xl font-bold mb-6 pb-6 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 text-transparent bg-clip-text z-100 ">
                 Workflow Automation
                 <br />
@@ -224,10 +243,11 @@ const LandingPage = () => {
               </h1>
             </div>
             <p className="text-xl mb-8 text-gray-300 max-w-2xl mx-auto">
-              Transform your business processes with PokeFlow's powerful automation platform. 
-              Design, deploy, and optimize workflows with unmatched efficiency!
+              Transform your business processes with PokeFlow's powerful
+              automation platform. Design, deploy, and optimize workflows with
+              unmatched efficiency!
             </p>
-            <Button 
+            <Button
               onClick={handleAuthClick}
               className="px-8 py-6 text-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-300"
             >
@@ -241,7 +261,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 py-20">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <Card 
+              <Card
                 key={index}
                 className="bg-gray-800/50 backdrop-blur-lg border-white/5 hover:bg-gray-800/70 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10"
               >
@@ -270,10 +290,10 @@ const LandingPage = () => {
             Ready to Transform Your Workflow?
           </h2>
           <p className="text-xl mb-8 text-gray-300 max-w-2xl mx-auto">
-            Join thousands of businesses already using PokeFlow to automate their processes
-            and achieve unprecedented efficiency.
+            Join thousands of businesses already using PokeFlow to automate
+            their processes and achieve unprecedented efficiency.
           </p>
-          <Button 
+          <Button
             onClick={handleAuthClick}
             className="px-8 py-6 text-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
           >
@@ -283,22 +303,33 @@ const LandingPage = () => {
         </div>
       </div>
 
-      <GoogleSignInDialog 
-        open={openDialog} 
-        onOpenChange={setOpenDialog} 
-        onSignInSuccess={handleSignInSuccess} 
+      <GoogleSignInDialog
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+        onSignInSuccess={handleSignInSuccess}
       />
 
       <style jsx global>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
         }
-        
+
         @keyframes gradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
         }
 
         @keyframes meteor-effect {

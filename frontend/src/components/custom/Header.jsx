@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
-import GoogleSignInDialog from '@/pages/Googledialog';// Adjust path as needed
+import React, { useState, useEffect } from "react";
+import { Button } from "../ui/button";
+import GoogleSignInDialog from "@/pages/Googledialog"; // Adjust path as needed
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 function Header() {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     // Check for user in localStorage on component mount
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
   }, [openDialog]);
 
   const handleSignOut = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
     setUser(null);
-    toast.success('Signed out successfully');
+    toast.success("Signed out successfully");
     navigate("/");
   };
 
@@ -40,30 +40,30 @@ function Header() {
 
   return (
     <>
-      <div className='p-2 shadow-sm flex justify-between items-center px-5'>
-        <img src="/logo.svg" alt="Logo" className='w-20 h-10 shadow-sm'/>
+      <div className="p-2 shadow-sm flex justify-between items-center px-5">
+        <img src="/logo.svg" alt="Logo" className="w-20 h-10 shadow-sm" />
         <div className="flex items-center gap-4">
           {user && (
             <div className="flex items-center gap-2">
-              <img 
-                src={user.picture} 
-                alt={user.name} 
+              <img
+                src={user.picture}
+                alt={user.name}
                 className="w-8 h-8 rounded-full"
               />
               <span className="text-sm font-medium">{user.name}</span>
             </div>
           )}
-          <Button 
+          <Button
             onClick={handleAuthClick}
             variant={user ? "destructive" : "default"}
           >
-            {user ? 'Sign out' : 'Sign in'}
+            {user ? "Sign out" : "Sign in"}
           </Button>
         </div>
       </div>
 
-      <GoogleSignInDialog 
-        open={openDialog} 
+      <GoogleSignInDialog
+        open={openDialog}
         onOpenChange={setOpenDialog}
         onSignInSuccess={handleSignInSuccess}
       />

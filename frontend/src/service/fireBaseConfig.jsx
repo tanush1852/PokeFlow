@@ -11,9 +11,9 @@ const firebaseConfig = {
   projectId: "automatedans",
   storageBucket: "automatedans.firebasestorage.app",
   messagingSenderId: "473649036417",
-  appId: "1:473649036417:web:4eac399fb07adcd1e56180"
+  appId: "1:473649036417:web:4eac399fb07adcd1e56180",
 };
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export const db=getFirestore(app);
+export const db = getFirestore(app);

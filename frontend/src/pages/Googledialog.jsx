@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,8 +7,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useGoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
+import { useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 import { toast } from "sonner";
 
 const GoogleSignInDialog = ({ open, onOpenChange }) => {
@@ -16,26 +16,25 @@ const GoogleSignInDialog = ({ open, onOpenChange }) => {
     onSuccess: async (tokenResponse) => {
       try {
         const userInfo = await axios.get(
-          'https://www.googleapis.com/oauth2/v3/userinfo',
+          "https://www.googleapis.com/oauth2/v3/userinfo",
           {
             headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-            Accept:'Application/json'
-          }
-        )
-        console.log('User Info:', userInfo.data)
+            Accept: "Application/json",
+          },
+        );
+        console.log("User Info:", userInfo.data);
 
-        localStorage.setItem('user', JSON.stringify(userInfo.data));
+        localStorage.setItem("user", JSON.stringify(userInfo.data));
         onOpenChange(false);
-        toast.success('Successfully signed in!');
-       
+        toast.success("Successfully signed in!");
       } catch (error) {
-        console.error('Error fetching user info:', error);
-        toast.error('Failed to sign in. Please try again.');
+        console.error("Error fetching user info:", error);
+        toast.error("Failed to sign in. Please try again.");
       }
     },
     onError: () => {
-      toast.error('Sign in failed. Please try again.');
-    }
+      toast.error("Sign in failed. Please try again.");
+    },
   });
 
   return (
@@ -80,11 +79,7 @@ const GoogleSignInDialog = ({ open, onOpenChange }) => {
             onClick={() => login()}
             className="flex w-full items-center justify-center space-x-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            <svg
-              className="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"

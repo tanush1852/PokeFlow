@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const AnimatedBackground = () => {
   return (
@@ -18,16 +18,52 @@ const AnimatedBackground = () => {
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 5}s`,
-              opacity: 0.3
+              opacity: 0.3,
             }}
           >
             <div className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center">
-              {i === 0 && <img src="/api/placeholder/48/48" alt="Drive" className="w-6 h-6" />}
-              {i === 1 && <img src="/api/placeholder/48/48" alt="Sheets" className="w-6 h-6" />}
-              {i === 2 && <img src="/api/placeholder/48/48" alt="Gmail" className="w-6 h-6" />}
-              {i === 3 && <img src="/api/placeholder/48/48" alt="Meet" className="w-6 h-6" />}
-              {i === 4 && <img src="/api/placeholder/48/48" alt="Calendar" className="w-6 h-6" />}
-              {i === 5 && <img src="/api/placeholder/48/48" alt="Docs" className="w-6 h-6" />}
+              {i === 0 && (
+                <img
+                  src="/api/placeholder/48/48"
+                  alt="Drive"
+                  className="w-6 h-6"
+                />
+              )}
+              {i === 1 && (
+                <img
+                  src="/api/placeholder/48/48"
+                  alt="Sheets"
+                  className="w-6 h-6"
+                />
+              )}
+              {i === 2 && (
+                <img
+                  src="/api/placeholder/48/48"
+                  alt="Gmail"
+                  className="w-6 h-6"
+                />
+              )}
+              {i === 3 && (
+                <img
+                  src="/api/placeholder/48/48"
+                  alt="Meet"
+                  className="w-6 h-6"
+                />
+              )}
+              {i === 4 && (
+                <img
+                  src="/api/placeholder/48/48"
+                  alt="Calendar"
+                  className="w-6 h-6"
+                />
+              )}
+              {i === 5 && (
+                <img
+                  src="/api/placeholder/48/48"
+                  alt="Docs"
+                  className="w-6 h-6"
+                />
+              )}
             </div>
           </div>
         ))}
@@ -42,7 +78,7 @@ const AnimatedBackground = () => {
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             animationDelay: `${Math.random() * 8}s`,
-            animationDuration: `${Math.random() * 3 + 2}s`
+            animationDuration: `${Math.random() * 3 + 2}s`,
           }}
         >
           <div className="absolute left-0 top-0 h-[2px] w-[50px] bg-gradient-to-r from-blue-400 to-transparent" />

@@ -154,7 +154,7 @@ const DragDropInterface = () => {
             if (options.loadMails) {
               try {
                 const response = await axios.get(
-                  "http://localhost:5000/api/emails"
+                  "http://localhost:5000/api/emails",
                 );
                 console.log("Emails loaded:", response.data);
                 toast.success(`Successfully loaded emails from Gmail`);
@@ -166,7 +166,7 @@ const DragDropInterface = () => {
             if (options.tasks) {
               try {
                 const response = await axios.get(
-                  "http://localhost:5000/api/send_tasks_notion"
+                  "http://localhost:5000/api/send_tasks_notion",
                 );
                 console.log("Tasks loaded:", response.data);
                 toast.success(`Successfully processed tasks from Gmail`);
@@ -178,7 +178,7 @@ const DragDropInterface = () => {
             if (options.attachments) {
               try {
                 const response = await axios.get(
-                  "http://localhost:5000/api/attachments"
+                  "http://localhost:5000/api/attachments",
                 );
                 console.log("Attachments loaded:", response.data);
                 toast.success(`Successfully processed attachments from Gmail`);
@@ -448,7 +448,7 @@ const DragDropInterface = () => {
               <div className="space-y-3">
                 {apps
                   .filter((app) =>
-                    app.name.toLowerCase().includes(searchTerm.toLowerCase())
+                    app.name.toLowerCase().includes(searchTerm.toLowerCase()),
                   )
                   .map((app) => (
                     <div

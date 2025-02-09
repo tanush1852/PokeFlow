@@ -1,151 +1,170 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Mail, Linkedin, FileText, Database, Search, FileSpreadsheet,
-  Sparkles, Video, Link2, User, Lock, MapPin, Briefcase,
-  Upload, X, Sun, Moon, Plus, ArrowRight
-} from 'lucide-react';
-import axios from 'axios';
-import { toast } from 'sonner';
+  Mail,
+  Linkedin,
+  FileText,
+  Database,
+  Search,
+  FileSpreadsheet,
+  Sparkles,
+  Video,
+  Link2,
+  User,
+  Lock,
+  MapPin,
+  Briefcase,
+  Upload,
+  X,
+  Sun,
+  Moon,
+  Plus,
+  ArrowRight,
+} from "lucide-react";
+import axios from "axios";
+import { toast } from "sonner";
 
 const IntegratedInterface = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [draggedApp, setDraggedApp] = useState(null);
   const [droppedApps, setDroppedApps] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [darkMode, setDarkMode] = useState(false);
   const [credentials, setCredentials] = useState({});
   const [selectedFile, setSelectedFile] = useState({});
-  const [activeTab, setActiveTab] = useState('templates');
+  const [activeTab, setActiveTab] = useState("templates");
 
   const apps = [
-    { 
-      id: 1, 
-      name: 'Google Meet', 
-      icon: Video, 
-      color: '#00897B',
-      description: 'Summarize meeting transcripts and create action items'
+    {
+      id: 1,
+      name: "Google Meet",
+      icon: Video,
+      color: "#00897B",
+      description: "Summarize meeting transcripts and create action items",
     },
-    { 
-      id: 2, 
-      name: 'Gmail', 
-      icon: Mail, 
-      color: '#EA4335',
-      description: 'Process emails, tasks, and attachments',
+    {
+      id: 2,
+      name: "Gmail",
+      icon: Mail,
+      color: "#EA4335",
+      description: "Process emails, tasks, and attachments",
       validConnections: {
         tasks: [6], // Notion ID
         meet: [5], // Notion ID
-        attachments: [4] // Google Drive ID
-      }
+        attachments: [4], // Google Drive ID
+      },
     },
-    { 
-      id: 3, 
-      name: 'LinkedIn', 
-      icon: Linkedin, 
-      color: '#0A66C2',
-      description: 'Search and analyze job listings'
+    {
+      id: 3,
+      name: "LinkedIn",
+      icon: Linkedin,
+      color: "#0A66C2",
+      description: "Search and analyze job listings",
     },
-    { 
-      id: 4, 
-      name: 'Google Drive', 
-      icon: Database, 
-      color: '#0F9D58',
-      description: 'Store and manage files'
+    {
+      id: 4,
+      name: "Google Drive",
+      icon: Database,
+      color: "#0F9D58",
+      description: "Store and manage files",
     },
-    { 
-      id: 5, 
-      name: 'Google Sheets', 
-      icon: FileSpreadsheet, 
-      color: '#34A853',
-      description: 'Analyze and visualize data'
+    {
+      id: 5,
+      name: "Google Sheets",
+      icon: FileSpreadsheet,
+      color: "#34A853",
+      description: "Analyze and visualize data",
     },
-    { 
-      id: 6, 
-      name: 'Notion', 
-      icon: FileText, 
-      color: '#000000',
-      description: 'Document and organize information'
-    }
+    {
+      id: 6,
+      name: "Notion",
+      icon: FileText,
+      color: "#000000",
+      description: "Document and organize information",
+    },
   ];
 
   const templates = [
     {
       id: 1,
       name: "Gmail Tasks to Notion",
-      description: "Automatically sync your Gmail tasks to Notion for better task management",
+      description:
+        "Automatically sync your Gmail tasks to Notion for better task management",
       apps: [
-        { 
-          id: 2, 
-          name: 'Gmail', 
-          icon: Mail, 
-          color: '#EA4335',
-          presetOptions: { tasks: true }
+        {
+          id: 2,
+          name: "Gmail",
+          icon: Mail,
+          color: "#EA4335",
+          presetOptions: { tasks: true },
         },
-        { 
-          id: 6, 
-          name: 'Notion', 
-          icon: FileText, 
-          color: '#000000'
-        }
-      ]
+        {
+          id: 6,
+          name: "Notion",
+          icon: FileText,
+          color: "#000000",
+        },
+      ],
     },
     {
       id: 2,
       name: "Gmail Attachments to Drive",
       description: "Save your Gmail attachments directly to Google Drive",
       apps: [
-        { 
-          id: 2, 
-          name: 'Gmail', 
-          icon: Mail, 
-          color: '#EA4335',
-          presetOptions: { attachments: true }
+        {
+          id: 2,
+          name: "Gmail",
+          icon: Mail,
+          color: "#EA4335",
+          presetOptions: { attachments: true },
         },
-        { 
-          id: 4, 
-          name: 'Google Drive', 
-          icon: Database, 
-          color: '#0F9D58'
-        }
-      ]
+        {
+          id: 4,
+          name: "Google Drive",
+          icon: Database,
+          color: "#0F9D58",
+        },
+      ],
     },
     {
       id: 3,
       name: "Meet Summary to Sheets",
-      description: "Summarize meeting transcripts and save them to Google Sheets",
+      description:
+        "Summarize meeting transcripts and save them to Google Sheets",
       apps: [
-        { 
-          id: 1, 
-          name: 'Google Meet', 
-          icon: Video, 
-          color: '#00897B'
+        {
+          id: 1,
+          name: "Google Meet",
+          icon: Video,
+          color: "#00897B",
         },
-        { 
-          id: 5, 
-          name: 'Google Sheets', 
-          icon: FileSpreadsheet, 
-          color: '#34A853'
-        }
-      ]
+        {
+          id: 5,
+          name: "Google Sheets",
+          icon: FileSpreadsheet,
+          color: "#34A853",
+        },
+      ],
     },
     {
-        id: 4,
-        name: "Gmail Meet to Sheets",  // Changed name
-        description: "Save meeting details from Gmail to Sheets", // Changed description
-        apps: [
-          { 
-            id: 2, 
-            name: 'Gmail', 
-            icon: Mail, 
-            color: '#EA4335',
-            presetOptions: { meet: true }
-          },
-          { 
-            id: 5, // Changed to Sheets
-            name: 'Google Sheets', 
-            icon: FileSpreadsheet, 
-            color: '#34A853'
-          }
-        ]}
+      id: 4,
+      name: "Gmail Meet to Sheets", // Changed name
+      description: "Save meeting details from Gmail to Sheets", // Changed description
+      apps: [
+        {
+          id: 2,
+          name: "Gmail",
+          icon: Mail,
+          color: "#EA4335",
+          presetOptions: { meet: true },
+        },
+        {
+          id: 5, // Changed to Sheets
+          name: "Google Sheets",
+          icon: FileSpreadsheet,
+          color: "#34A853",
+        },
+      ],
+    },
   ];
 
   const handleTemplateSelect = (template) => {
@@ -155,16 +174,16 @@ const IntegratedInterface = () => {
     setSelectedFile({});
     setDroppedApps(template.apps);
 
-    template.apps.forEach(app => {
+    template.apps.forEach((app) => {
       if (app.presetOptions) {
-        setSelectedOptions(prev => ({
+        setSelectedOptions((prev) => ({
           ...prev,
-          [app.id]: app.presetOptions
+          [app.id]: app.presetOptions,
         }));
       }
     });
 
-    setActiveTab('apps');
+    setActiveTab("apps");
   };
 
   const handleOptionChange = (appId, option) => {
@@ -172,7 +191,7 @@ const IntegratedInterface = () => {
     newOptions[option] = !selectedOptions[appId]?.[option];
     setSelectedOptions({
       ...selectedOptions,
-      [appId]: newOptions
+      [appId]: newOptions,
     });
   };
 
@@ -181,8 +200,8 @@ const IntegratedInterface = () => {
       ...credentials,
       [appId]: {
         ...credentials[appId],
-        [field]: value
-      }
+        [field]: value,
+      },
     });
   };
 
@@ -190,7 +209,7 @@ const IntegratedInterface = () => {
     const file = event.target.files[0];
     setSelectedFile({
       ...selectedFile,
-      [appId]: file
+      [appId]: file,
     });
   };
 
@@ -205,60 +224,64 @@ const IntegratedInterface = () => {
   const handleDrop = (e) => {
     e.preventDefault();
     if (!draggedApp) return;
-  
-    if (droppedApps.find(app => app.id === draggedApp.id)) return;
-  
-    const gmailApp = droppedApps.find(app => app.id === 2);
+
+    if (droppedApps.find((app) => app.id === draggedApp.id)) return;
+
+    const gmailApp = droppedApps.find((app) => app.id === 2);
     const gmailOptions = gmailApp ? selectedOptions[2] || {} : {};
-  
+
     if (gmailApp) {
-      const validConnections = apps.find(a => a.id === 2).validConnections;
+      const validConnections = apps.find((a) => a.id === 2).validConnections;
       if (gmailOptions.tasks && draggedApp.id !== 6) return;
       if (gmailOptions.meet && draggedApp.id !== 5) return; // Changed to 5 for Sheets
       if (gmailOptions.attachments && draggedApp.id !== 4) return;
     }
-  
+
     setDroppedApps([...droppedApps, draggedApp]);
     setDraggedApp(null);
   };
 
   const removeApp = (appId) => {
-    setDroppedApps(droppedApps.filter(app => app.id !== appId));
+    setDroppedApps(droppedApps.filter((app) => app.id !== appId));
     setSelectedOptions({ ...selectedOptions, [appId]: {} });
     setCredentials({ ...credentials, [appId]: {} });
     setSelectedFile({ ...selectedFile, [appId]: null });
   };
 
   const isValidConfiguration = () => {
-    const gmailApp = droppedApps.find(app => app.id === 2);
+    const gmailApp = droppedApps.find((app) => app.id === 2);
     if (!gmailApp) return true;
-  
+
     const gmailOptions = selectedOptions[2] || {};
-    const hasGmailOption = Object.values(gmailOptions).some(val => val);
-    
+    const hasGmailOption = Object.values(gmailOptions).some((val) => val);
+
     if (!hasGmailOption) return true;
-    
+
     if (gmailOptions.tasks) {
-      return droppedApps.some(app => app.id === 6);
+      return droppedApps.some((app) => app.id === 6);
     }
     if (gmailOptions.meet) {
-      return droppedApps.some(app => app.id === 5); // Changed to check for Sheets
+      return droppedApps.some((app) => app.id === 5); // Changed to check for Sheets
     }
     if (gmailOptions.attachments) {
-      return droppedApps.some(app => app.id === 4);
+      return droppedApps.some((app) => app.id === 4);
     }
-    
+
     return true;
   };
 
   const renderAppOptions = (app) => {
     switch (app.name) {
-      case 'Google Meet':
+      case "Google Meet":
         return (
           <div className="space-y-3">
-            <div className={`p-4 rounded border ${
-              darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
-            }`}>
+            <div
+              className={`p-4 rounded border ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-gray-50 border-gray-200"
+              }`}
+            >
               <label className="flex items-center justify-center w-full">
                 <input
                   type="file"
@@ -266,12 +289,15 @@ const IntegratedInterface = () => {
                   className="hidden"
                   accept=".txt"
                 />
-                <div className={`flex flex-col items-center cursor-pointer ${
-                  darkMode ? 'text-gray-300' : 'text-gray-600'
-                }`}>
+                <div
+                  className={`flex flex-col items-center cursor-pointer ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   <Upload className="h-6 w-6 mb-2" />
                   <span className="text-sm">
-                    {selectedFile[app.id]?.name || 'Upload text file to summarize'}
+                    {selectedFile[app.id]?.name ||
+                      "Upload text file to summarize"}
                   </span>
                 </div>
               </label>
@@ -279,10 +305,10 @@ const IntegratedInterface = () => {
           </div>
         );
 
-      case 'Gmail':
+      case "Gmail":
         return (
           <div className="space-y-3">
-            {['tasks', 'meet', 'attachments'].map(option => (
+            {["tasks", "meet", "attachments"].map((option) => (
               <label key={option} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -290,7 +316,7 @@ const IntegratedInterface = () => {
                   onChange={() => handleOptionChange(app.id, option)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>
+                <span className={darkMode ? "text-gray-300" : "text-gray-700"}>
                   {option.charAt(0).toUpperCase() + option.slice(1)}
                 </span>
               </label>
@@ -298,87 +324,117 @@ const IntegratedInterface = () => {
           </div>
         );
 
-      case 'LinkedIn':
+      case "LinkedIn":
         return (
           <div className="space-y-3">
             <input
               type="email"
               placeholder="Email"
               className={`w-full p-2 rounded border ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
               }`}
-              onChange={(e) => handleCredentialChange(app.id, 'email', e.target.value)}
-              value={credentials[app.id]?.email || ''}
+              onChange={(e) =>
+                handleCredentialChange(app.id, "email", e.target.value)
+              }
+              value={credentials[app.id]?.email || ""}
             />
             <input
               type="password"
               placeholder="Password"
               className={`w-full p-2 rounded border ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
               }`}
-              onChange={(e) => handleCredentialChange(app.id, 'password', e.target.value)}
-              value={credentials[app.id]?.password || ''}
+              onChange={(e) =>
+                handleCredentialChange(app.id, "password", e.target.value)
+              }
+              value={credentials[app.id]?.password || ""}
             />
             <input
               type="text"
               placeholder="Job Post"
               className={`w-full p-2 rounded border ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
               }`}
-              onChange={(e) => handleCredentialChange(app.id, 'jobPost', e.target.value)}
-              value={credentials[app.id]?.jobPost || ''}
+              onChange={(e) =>
+                handleCredentialChange(app.id, "jobPost", e.target.value)
+              }
+              value={credentials[app.id]?.jobPost || ""}
             />
             <input
               type="text"
               placeholder="Location"
               className={`w-full p-2 rounded border ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
               }`}
-              onChange={(e) => handleCredentialChange(app.id, 'location', e.target.value)}
-              value={credentials[app.id]?.location || ''}
+              onChange={(e) =>
+                handleCredentialChange(app.id, "location", e.target.value)
+              }
+              value={credentials[app.id]?.location || ""}
             />
           </div>
         );
 
-      case 'Google Drive':
+      case "Google Drive":
         return (
           <div className="space-y-3">
             <input
               type="email"
               placeholder="Gmail ID"
               className={`w-full p-2 rounded border ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
               }`}
-              onChange={(e) => handleCredentialChange(app.id, 'email', e.target.value)}
-              value={credentials[app.id]?.email || ''}
+              onChange={(e) =>
+                handleCredentialChange(app.id, "email", e.target.value)
+              }
+              value={credentials[app.id]?.email || ""}
             />
             <input
               type="password"
               placeholder="Password"
               className={`w-full p-2 rounded border ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
               }`}
-              onChange={(e) => handleCredentialChange(app.id, 'password', e.target.value)}
-              value={credentials[app.id]?.password || ''}
+              onChange={(e) =>
+                handleCredentialChange(app.id, "password", e.target.value)
+              }
+              value={credentials[app.id]?.password || ""}
             />
           </div>
         );
 
-      case 'Google Sheets':
-        const prevApp = droppedApps[droppedApps.findIndex(a => a.id === app.id) - 1];
+      case "Google Sheets":
+        const prevApp =
+          droppedApps[droppedApps.findIndex((a) => a.id === app.id) - 1];
         return prevApp ? (
-          <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <p className={darkMode ? 'text-gray-300' : 'text-gray-700'}>
+          <div
+            className={`p-3 rounded ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}
+          >
+            <p className={darkMode ? "text-gray-300" : "text-gray-700"}>
               Data from {prevApp.name} will be stored in Sheets
             </p>
           </div>
         ) : null;
 
-      case 'Notion':
-        const previousApp = droppedApps[droppedApps.findIndex(a => a.id === app.id) - 1];
+      case "Notion":
+        const previousApp =
+          droppedApps[droppedApps.findIndex((a) => a.id === app.id) - 1];
         return previousApp ? (
-          <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <p className={darkMode ? 'text-gray-300' : 'text-gray-700'}>
+          <div
+            className={`p-3 rounded ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}
+          >
+            <p className={darkMode ? "text-gray-300" : "text-gray-700"}>
               Data from {previousApp.name} will be stored in Notion
             </p>
           </div>
@@ -390,58 +446,73 @@ const IntegratedInterface = () => {
   };
 
   const handleSubmit = async () => {
-    console.log('Processing apps with the following data:');
-    console.log('Dropped Apps:', droppedApps);
-    console.log('Selected Options:', selectedOptions);
-    console.log('Credentials:', credentials);
-    console.log('Selected Files:', selectedFile);
+    console.log("Processing apps with the following data:");
+    console.log("Dropped Apps:", droppedApps);
+    console.log("Selected Options:", selectedOptions);
+    console.log("Credentials:", credentials);
+    console.log("Selected Files:", selectedFile);
 
     for (const app of droppedApps) {
       const options = selectedOptions[app.id] || {};
 
       switch (app.name) {
-        case 'Gmail':
+        case "Gmail":
           if (options.tasks) {
             try {
-              const response = await axios.get('http://localhost:5000/api/send_tasks_notion');
-              console.log('Tasks loaded:', response.data);
+              const response = await axios.get(
+                "http://localhost:5000/api/send_tasks_notion",
+              );
+              console.log("Tasks loaded:", response.data);
               toast.success(`Successfully processed tasks from Gmail`);
             } catch (error) {
-              console.error('Error loading tasks:', error);
+              console.error("Error loading tasks:", error);
               toast.error(`Failed to process tasks: ${error.message}`);
             }
           }
           if (options.meet) {
             try {
-              const response = await axios.get('http://localhost:5000/api/send_meet_notion');
-              console.log('Meet details loaded:', response.data);
+              const response = await axios.get(
+                "http://localhost:5000/api/send_meet_notion",
+              );
+              console.log("Meet details loaded:", response.data);
               toast.success(`Successfully processed meet details from Gmail`);
             } catch (error) {
-              console.error('Error loading meet details:', error);
+              console.error("Error loading meet details:", error);
               toast.error(`Failed to process meet details: ${error.message}`);
             }
           }
           if (options.attachments) {
             try {
-              const response = await axios.get('http://localhost:5000/api/attachments');
-              console.log('Attachments loaded:', response.data);
+              const response = await axios.get(
+                "http://localhost:5000/api/attachments",
+              );
+              console.log("Attachments loaded:", response.data);
               toast.success(`Successfully processed attachments from Gmail`);
             } catch (error) {
-              console.error('Error loading attachments:', error);
+              console.error("Error loading attachments:", error);
               toast.error(`Failed to process attachments: ${error.message}`);
             }
           }
           break;
-          
 
-        // Add cases for other apps like 'Google Meet', 'LinkedIn', etc.
-        // case 'Google Meet':
-        //   // Handle Google Meet integration
-        //   break;
-
-        // case 'LinkedIn':
-        //   // Handle LinkedIn integration
-        //   break;
+        case "LinkedIn":
+          try {
+            const response = await axios.post(
+              "http://localhost:5000/api/scrape-linkedin",
+              {
+                email: credentials[app.id]?.email,
+                password: credentials[app.id]?.password,
+                job_title: credentials[app.id]?.jobPost,
+                location: credentials[app.id]?.location,
+              },
+            );
+            console.log("LinkedIn data loaded:", response.data);
+            toast.success(`Successfully processed LinkedIn data`);
+          } catch (error) {
+            console.error("Error loading LinkedIn data:", error);
+            toast.error(`Failed to process LinkedIn data: ${error.message}`);
+          }
+          break;
 
         default:
           console.log(`No integration defined for ${app.name}`);
@@ -450,38 +521,42 @@ const IntegratedInterface = () => {
   };
 
   return (
-    <div className={`min-h-screen p-8 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div
+      className={`min-h-screen p-8 ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-6">
-            <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h1
+              className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+            >
               Integration Hub
             </h1>
             <div className="flex space-x-4">
               <button
-                onClick={() => setActiveTab('templates')}
+                onClick={() => setActiveTab("templates")}
                 className={`px-4 py-2 rounded-lg ${
-                  activeTab === 'templates'
-                    ? darkMode 
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-500 text-white'
-                      : darkMode
-                      ? 'text-gray-400 hover:text-white'
-                      : 'text-gray-600 hover:text-gray-900'
+                  activeTab === "templates"
+                    ? darkMode
+                      ? "bg-blue-600 text-white"
+                      : "bg-blue-500 text-white"
+                    : darkMode
+                      ? "text-gray-400 hover:text-white"
+                      : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 Templates
               </button>
               <button
-                onClick={() => setActiveTab('apps')}
+                onClick={() => setActiveTab("apps")}
                 className={`px-4 py-2 rounded-lg ${
-                  activeTab === 'apps'
-                    ? darkMode 
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-500 text-white'
+                  activeTab === "apps"
+                    ? darkMode
+                      ? "bg-blue-600 text-white"
+                      : "bg-blue-500 text-white"
                     : darkMode
-                      ? 'text-gray-400 hover:text-white'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? "text-gray-400 hover:text-white"
+                      : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 Apps
@@ -490,7 +565,7 @@ const IntegratedInterface = () => {
           </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className={`p-2 rounded-lg ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}
+            className={`p-2 rounded-lg ${darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
@@ -499,24 +574,34 @@ const IntegratedInterface = () => {
         <div className="grid grid-cols-12 gap-8">
           {/* Left Panel */}
           <div className="col-span-3">
-            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-              {activeTab === 'templates' ? (
+            <div
+              className={`p-4 rounded-lg ${darkMode ? "bg-gray-800" : "bg-white"} shadow`}
+            >
+              {activeTab === "templates" ? (
                 <div className="space-y-4">
-                  <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h2
+                    className={`text-lg font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}
+                  >
                     Saved Templates
                   </h2>
                   {templates.map((template) => (
                     <div
                       key={template.id}
                       className={`p-4 rounded-lg border ${
-                        darkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'
+                        darkMode
+                          ? "border-gray-700 hover:border-gray-600"
+                          : "border-gray-200 hover:border-gray-300"
                       } cursor-pointer transition-colors`}
                       onClick={() => handleTemplateSelect(template)}
                     >
-                      <h3 className={`font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                      <h3
+                        className={`font-medium mb-2 ${darkMode ? "text-white" : "text-gray-900"}`}
+                      >
                         {template.name}
                       </h3>
-                      <p className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p
+                        className={`text-sm mb-3 ${darkMode ? "text-gray-400" : "text-gray-600"}`}
+                      >
                         {template.description}
                       </p>
                       <div className="flex space-x-2">
@@ -536,22 +621,28 @@ const IntegratedInterface = () => {
               ) : (
                 <div className="space-y-4">
                   <div className="relative">
-                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                    <Search
+                      className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                    />
                     <input
                       type="text"
                       placeholder="Search apps..."
-                      className={`w-full pl-10 pr-4 py-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                      className={`w-full pl-10 pr-4 py-2 rounded-lg border ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       value={searchTerm}
                     />
                   </div>
                   {apps
-                    .filter(app => app.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .filter((app) =>
+                      app.name.toLowerCase().includes(searchTerm.toLowerCase()),
+                    )
                     .map((app) => (
                       <div
                         key={app.id}
                         className={`p-4 rounded-lg border ${
-                          darkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'
+                          darkMode
+                            ? "border-gray-700 hover:border-gray-600"
+                            : "border-gray-200 hover:border-gray-300"
                         } cursor-pointer transition-colors`}
                         draggable
                         onDragStart={() => handleDragStart(app)}
@@ -564,10 +655,14 @@ const IntegratedInterface = () => {
                             <app.icon className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                            <h3
+                              className={`text-lg font-medium ${darkMode ? "text-white" : "text-gray-900"}`}
+                            >
                               {app.name}
                             </h3>
-                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <p
+                              className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}
+                            >
                               {app.description}
                             </p>
                           </div>
@@ -581,21 +676,25 @@ const IntegratedInterface = () => {
 
           {/* Right Panel */}
           <div
-            className={`col-span-9 p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}
+            className={`col-span-9 p-4 rounded-lg ${darkMode ? "bg-gray-800" : "bg-white"} shadow`}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
             {droppedApps.length === 0 ? (
-              <div className={`h-full flex flex-col items-center justify-center ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              <div
+                className={`h-full flex flex-col items-center justify-center ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+              >
                 <Plus className="w-12 h-12 mb-4" />
-                <p className="text-lg">Drag and drop apps here to get started</p>
+                <p className="text-lg">
+                  Drag and drop apps here to get started
+                </p>
               </div>
             ) : (
               <div className="space-y-6">
                 {droppedApps.map((app, index) => (
                   <div
                     key={app.id}
-                    className={`p-6 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                    className={`p-6 rounded-lg border ${darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center space-x-3">
@@ -605,21 +704,29 @@ const IntegratedInterface = () => {
                         >
                           <app.icon className="w-6 h-6 text-white" />
                         </div>
-                        <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        <h3
+                          className={`text-lg font-medium ${darkMode ? "text-white" : "text-gray-900"}`}
+                        >
                           {app.name}
                         </h3>
                       </div>
                       <button
                         onClick={() => removeApp(app.id)}
-                        className={`p-1 rounded-lg hover:bg-gray-200 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'}`}
+                        className={`p-1 rounded-lg hover:bg-gray-200 ${darkMode ? "hover:bg-gray-600" : "hover:bg-gray-200"}`}
                       >
-                        <X className={darkMode ? 'text-gray-400' : 'text-gray-500'} />
+                        <X
+                          className={
+                            darkMode ? "text-gray-400" : "text-gray-500"
+                          }
+                        />
                       </button>
                     </div>
                     {renderAppOptions(app)}
                     {index < droppedApps.length - 1 && (
                       <div className="flex justify-center my-4">
-                        <ArrowRight className={`w-6 h-6 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                        <ArrowRight
+                          className={`w-6 h-6 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                        />
                       </div>
                     )}
                   </div>
@@ -627,7 +734,7 @@ const IntegratedInterface = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={!isValidConfiguration()}
-                  className={`w-full py-3 rounded-lg ${!isValidConfiguration() ? 'bg-gray-400 cursor-not-allowed' : darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white font-medium transition-colors`}
+                  className={`w-full py-3 rounded-lg ${!isValidConfiguration() ? "bg-gray-400 cursor-not-allowed" : darkMode ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-500 hover:bg-blue-600"} text-white font-medium transition-colors`}
                 >
                   Process Integration
                 </button>
