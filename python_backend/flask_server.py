@@ -30,6 +30,10 @@ import nest_asyncio
 from functools import wraps
 from datetime import datetime
 
+## adding CORS
+
+from flask_cors import CORS
+
 load_dotenv()
 # Notion API setup
 NOTION_API_KEY = os.getenv("NOTION_API_KEY")
@@ -39,6 +43,7 @@ llm_interface = LLMModelInterface()
 
 app = Flask(__name__)
 nest_asyncio.apply()
+CORS(app)
 
 
 # If modifying these scopes, delete the file token.json.
