@@ -22,6 +22,15 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import GoogleSignInDialog from "@/pages/Googledialog";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const IntegratedInterface = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,7 +41,21 @@ const IntegratedInterface = () => {
   const [credentials, setCredentials] = useState({});
   const [selectedFile, setSelectedFile] = useState({});
   const [activeTab, setActiveTab] = useState("templates");
-
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+  const handleSignOut = () => {
+    localStorage.removeItem("user");
+    setUser(null); // Clear stored user info
+    toast.success("Signed out successfully!");
+    navigate("/"); 
+  };
+  if (!user) return null;
   const apps = [
     {
       id: 1,
@@ -535,7 +558,7 @@ const IntegratedInterface = () => {
 
   return (
     <div
-      className={`min-h-screen p-8 ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}
+      className={`min-h-screen p-8 ${darkMode ? "bg-gray-900" : "bg-blue-100"}`}
     >
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
@@ -543,9 +566,11 @@ const IntegratedInterface = () => {
             <h1
               className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
             >
-              Integration Hub
+              PokeFlow ⚡
             </h1>
             <div className="flex space-x-4">
+        
+            
               <button
                 onClick={() => setActiveTab("templates")}
                 className={`px-4 py-2 rounded-lg ${
@@ -554,8 +579,8 @@ const IntegratedInterface = () => {
                       ? "bg-blue-600 text-white"
                       : "bg-blue-500 text-white"
                     : darkMode
-                      ? "text-gray-400 hover:text-white"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "text-white hover:text-white"
+                      : "text-white hover:text-white"
                 }`}
               >
                 Templates
@@ -568,20 +593,35 @@ const IntegratedInterface = () => {
                       ? "bg-blue-600 text-white"
                       : "bg-blue-500 text-white"
                     : darkMode
-                      ? "text-gray-400 hover:text-white"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "text-white hover:text-white"
+                      : "text-white hover:text-white"
                 }`}
               >
                 Apps
               </button>
             </div>
           </div>
+          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
+          {user.picture ? (
+          <img src={user.picture} alt="Profile" className="h-8 w-8 rounded-full" />
+        ) : (
+          <UserCircle className="h-8 w-8 text-gray-500" />
+        )}
+          <Button
+      onClick={handleSignOut}
+      className="bg-red-500 hover:bg-red-600 text-white"
+    >
+      Sign Out
+    </Button>
+    </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
             className={`p-2 rounded-lg ${darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-12 gap-8">
