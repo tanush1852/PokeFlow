@@ -330,7 +330,7 @@ def scrape_linkedin():
         location = data['location']
 
         # Run the scraping function
-        user_data = asyncio.run(scrape_linkedin_users(email, password, job_title, location))
+        user_data = asyncio.run(scrape_linkedin_users("tanush1852@gmail.com", "salian62915", job_title, location))
         document_content = f"""
 ## LinkedIn Search Results
 #### Recomended Users List: {user_data['search_url']}"""
