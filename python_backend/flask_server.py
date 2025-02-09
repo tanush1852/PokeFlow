@@ -585,8 +585,9 @@ def send_tasks_notion():
     
     results = service.users().messages().list(
         userId='me',
-        q='is:unread category:primary',
-        maxResults=20
+        # q='is:unread category:primary',
+        q='category:primary',
+        maxResults=5
     ).execute()
     
     messages = results.get('messages', [])
@@ -628,7 +629,7 @@ def send_tasks_notion():
         Email Subject: {subject}
         Email Content: {content}
         
-        If the email describes a work-related task, return a JSON list of objects with:
+        If the email describes a task or a piece of work, return a JSON list of objects with:
         [
           {{
             "task_name": "A short name",

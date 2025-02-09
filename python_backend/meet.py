@@ -15,7 +15,7 @@ def minutes_meet(text):
     openai_api_key = os.getenv('OPENAI_API_KEY')
     if not openai_api_key:
         # Fallback API key if none is available
-        openai_api_key = ""
+        openai_api_key = "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"
         os.environ['OPENAI_API_KEY'] = openai_api_key
 
     target_len = 500
