@@ -201,13 +201,15 @@ def get_or_create_notion_database():
                 logging.info(f"Found existing Notion database: {result['id']}")
                 return result["id"]
 
-        # Create a new Notion database
+        # Create a new Notion database with specific columns
         logging.info("No existing database found. Creating a new one...")
         database = notion.databases.create(
             parent={"page_id": NOTION_PAGE_ID},
             title=[{"text": {"content": "Email Tasks"}}],
             properties={
-                "Task": {"title": {}},
+                "Task Name": {"title": {}},  # Title property
+                "Description": {"rich_text": {}},  # Text property
+                "Deadline": {"date": {}},  # Date property
                 "Status": {
                     "select": {
                         "options": [
@@ -234,17 +236,39 @@ def add_tasks_to_notion(database_id, tasks):
     
     try:
         for task in tasks:
+            # Parse the task string into components
+            task_data = task.split('\n')
+            task_name = task_data[0].replace('Task: ', '')
+            description = task_data[1].replace('Description: ', '')
+            deadline = task_data[2].replace('Deadline: ', '')
+
+            # Create properties object for Notion
+            properties = {
+                "Task Name": {"title": [{"text": {"content": task_name}}]},
+                "Description": {"rich_text": [{"text": {"content": description}}]},
+                "Status": {"select": {"name": "To Do"}},
+            }
+
+            # Add deadline if it exists and is not 'None'
+            if deadline and deadline.lower() != 'none':
+                try:
+                    # Convert deadline string to datetime format expected by Notion
+                    deadline_date = datetime.strptime(deadline, "%d/%m/%Y")
+                    properties["Deadline"] = {"date": {"start": deadline_date.isoformat()}}
+                except ValueError:
+                    logging.warning(f"Invalid date format for deadline: {deadline}")
+
+            # Create the page in Notion
             notion.pages.create(
                 parent={"database_id": database_id},
-                properties={
-                    "Task": {"title": [{"text": {"content": task}}]},
-                    "Status": {"select": {"name": "To Do"}},
-                },
+                properties=properties
             )
+            
         logging.info(f"Successfully added {len(tasks)} tasks to Notion.")
     
     except Exception as e:
         logging.error(f"Error adding tasks to Notion: {e}")
+        raise e
 
 
 def get_gmail_service():
@@ -675,7 +699,7 @@ def send_tasks_notion():
                 'data': list_of_tasks
             }), 200
         
-@app.route('/api/send_meets_notion', methods=['GET'])
+@app.route('/api/send_meet_notion', methods=['GET'])
 def send_meets_notion():
     service = get_gmail_service()
     
