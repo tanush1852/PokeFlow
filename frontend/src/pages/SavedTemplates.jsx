@@ -31,7 +31,13 @@ import {
 import GoogleSignInDialog from "@/pages/Googledialog";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-const ICON_SIZE = 24;
+const getInitials = (name) => {
+    if (!name) return "U"; // Default initial if name is missing
+    const words = name.split(" ");
+    return words.length > 1
+      ? words[0][0] + words[1][0] // First letter of first & last name
+      : words[0][0]; // First letter if only one word
+  };
 const IntegratedInterface = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [draggedApp, setDraggedApp] = useState(null);
@@ -622,10 +628,17 @@ const IntegratedInterface = () => {
           <div className="flex items-center space-x-4">
           <div className="flex items-center gap-4">
           {user.picture ? (
-          <img src={user.picture} alt="Profile" className="h-8 w-8 rounded-full" />
-        ) : (
-          <UserCircle className="h-8 w-8 text-gray-500" />
-        )}
+        <img
+          src={user.picture}
+          alt="Profile"
+          className="h-8 w-8 rounded-full"
+        />
+      ) : user.name ? (
+        <span>{getInitials(user.name).toUpperCase()}</span>
+      ) : (
+        <UserCircle className="h-8 w-8 text-gray-500" />
+      )}
+
           <Button
       onClick={handleSignOut}
       className="bg-red-500 hover:bg-red-600 text-white"
