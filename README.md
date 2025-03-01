@@ -30,7 +30,21 @@ PokeFlow is a powerful workflow automation platform that seamlessly integrates w
   - Notion API
   - OpenAI API
   - LinkedIn Scraping
-  
+## Interface
+![IMG-20250301-WA0021](https://github.com/user-attachments/assets/4f076c77-c6fd-4bf1-9d53-376688161884)
+
+![IMG-20250301-WA0028](https://github.com/user-attachments/assets/d361c9e7-c00c-4d1a-b014-72c2d85fcd4f)
+
+![IMG-20250301-WA0029](https://github.com/user-attachments/assets/fa95a75a-314d-46fe-a344-479a5496912b)
+
+![IMG-20250301-WA0026](https://github.com/user-attachments/assets/362de8d5-c796-4769-8dae-e7dd3dda5bbc)
+
+![IMG-20250301-WA0029](https://github.com/user-attachments/assets/e11fedbc-4f38-4953-bfdf-7cdab52af52a)
+
+![IMG-20250301-WA0023](https://github.com/user-attachments/assets/19e91833-61fc-491e-b5f3-847119b95523)
+
+![IMG-20250301-WA0033](https://github.com/user-attachments/assets/f3a8ec28-92ed-4e94-a0ec-d842ec20a846)
+
 
 ## 📦 Installation
 
