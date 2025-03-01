@@ -1,6 +1,6 @@
 # PokeFlow
 
-PokeFlow is a powerful workflow automation platform that seamlessly integrates with Google Suite to streamline task management, meeting coordination, and document organization. The platform leverages AI capabilities and provides a no-code environment for creating custom automation workflows.
+PokeFlow is a powerful workflow automation platform that seamlessly integrates with Google Suite, Notion and LinkedIn to streamline task management, meeting coordination, and document organization. The platform leverages AI capabilities and provides a no-code environment for creating custom automation workflows.
 
 ## 🚀 Features
 
