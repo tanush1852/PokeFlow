@@ -29,8 +29,8 @@ PokeFlow is a powerful workflow automation platform that seamlessly integrates w
   - Google Suite APIs
   - Notion API
   - OpenAI API
-  - LinkedIn API
-  - Stripe API
+  - LinkedIn Scraping
+  
 
 ## 📦 Installation
 
