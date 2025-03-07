@@ -10,8 +10,11 @@ from googleapiclient.errors import HttpError
 from llm_models import LLMModelInterface
 from notion_client import Client
 from dotenv import load_dotenv
-from meet import minutes_meet
+from meet import minutes_meet, generate_meeting_minutes_from_audio
+from youtube import generate_detailed_summary
 from docs import store_markdown_to_gdoc
+import tempfile
+from werkzeug.utils import secure_filename
 
 
 import os
@@ -392,58 +395,97 @@ def minutes_of_meet():
         'data': minutes
     }), 200
 
-# @app.route('/api/emails', methods=['GET'])
-# def get_mails():
-#     try:
-#         # Get Gmail service
-#         service = get_gmail_service()
+@app.route('/api/audio_minutes', methods=['POST'])
+def audio_minutes():
+    # Check if a file was uploaded
+    if 'audio_file' not in request.files:
+        return jsonify({
+            'status': 'error',
+            'message': 'No audio file provided'
+        }), 400
+    
+    audio_file = request.files['audio_file']
+    
+    # Check if the file has a name
+    if audio_file.filename == '':
+        return jsonify({
+            'status': 'error',
+            'message': 'No audio file selected'
+        }), 400
+    
+    # Create a temporary file to store the uploaded audio
+    temp_dir = tempfile.mkdtemp()
+    temp_path = os.path.join(temp_dir, secure_filename(audio_file.filename))
+    
+    try:
+        # Save the uploaded file to the temporary location
+        audio_file.save(temp_path)
         
-#         # Search for unread emails with primary inbox filter
-#         results = service.users().messages().list(
-#             userId='me',
-#             q='is:unread category:primary',  # Add category:primary to filter
-#             maxResults=20
-#         ).execute()
+        # Generate meeting minutes from the audio file
+        result = generate_meeting_minutes_from_audio(temp_path)
         
-#         messages = results.get('messages', [])
+        # Optional: Store the generated minutes in Google Docs
+        if 'store_to_gdoc' in request.form and request.form['store_to_gdoc'] == 'true':
+            document_id = store_markdown_to_gdoc(result['minutes'], doc_title="Minutes of Meeting")
+            result['document_id'] = document_id
         
-#         if not messages:
-#             return jsonify({
-#                 'status': 'success',
-#                 'message': 'No unread messages found in primary inbox',
-#                 'data': []
-#             }), 200
-            
-#         # Process each message
-#         emails = []
-#         for message in messages:
-#             # Double-check if the message is in primary inbox
-#             if is_primary_inbox_email(service, 'me', message['id']):
-#                 subject, content = get_email_content(service, 'me', message['id'])
-#                 if subject and content:
-#                     # Clean the content - remove excessive newlines and spaces
-#                     content = ' '.join(content.split())
-#                     emails.append({
-#                         'subject': subject,
-#                         'content': content,
-#                         'id': message['id']
-#                     })
-                    
-#                     # Break if we've found 10 primary inbox emails
-#                     if len(emails) >= 10:
-#                         break
-        
-#         return jsonify({
-#             'status': 'success',
-#             'message': f'Found {len(emails)} unread primary inbox emails',
-#             'data': emails
-#         }), 200
+        return jsonify({
+            'status': 'success',
+            'data': result
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+    
+    finally:
+        # Clean up the temporary file and directory
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        if os.path.exists(temp_dir):
+            os.rmdir(temp_dir)
 
-#     except HttpError as error:
-#         return jsonify({
-#             'status': 'error',
-#             'message': str(error)
-#         }), 500
+@app.route('/api/youtube_summary', methods=['POST'])
+def youtube_summary():
+    # Get JSON data from request
+    data = request.get_json()
+    
+    # Check if YouTube URL is provided
+    if not data or 'youtube_url' not in data:
+        return jsonify({
+            'status': 'error',
+            'message': 'No YouTube URL provided'
+        }), 400
+    
+    youtube_url = data['youtube_url']
+    
+    try:
+        # Generate summary from YouTube video
+        result = generate_detailed_summary(youtube_url)
+        
+        if "error" in result:
+            return jsonify({
+                'status': 'error',
+                'message': result["error"]
+            }), 400
+            
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'summary': result["summary"],
+                'transcript': result["transcript"],
+                'youtube_url': youtube_url
+            }
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
     
 @app.route('/api/extract_meets', methods=['GET'])
 def extract_meets():
@@ -524,84 +566,6 @@ def extract_meets():
         "data": results
     }), 200
     
-# @app.route('/api/extract_tasks', methods=['GET'])
-# def extract_tasks():
-#     # print("Extracting tasks from emails...")
-#     service = get_gmail_service()
-    
-#     results = service.users().messages().list(
-#         userId='me',
-#         q='is:unread category:primary',
-#         maxResults=20
-#     ).execute()
-    
-#     messages = results.get('messages', [])
-    
-#     if not messages:
-#         return jsonify({
-#             'status': 'success',
-#             'message': 'No unread messages found in primary inbox',
-#             'data': []
-#         }), 200
-        
-#     # Process each message
-#     emails = []
-#     for message in messages:
-#         # Double-check if the message is in primary inbox
-#         if is_primary_inbox_email(service, 'me', message['id']):
-#             subject, content = get_email_content(service, 'me', message['id'])
-#             if subject and content:
-#                 # Clean the content - remove excessive newlines and spaces
-#                 content = ' '.join(content.split())
-#                 emails.append({
-#                     'subject': subject,
-#                     'content': content,
-#                     'id': message['id']
-#                 })
-                
-#                 # Break if we've found 10 primary inbox emails
-#                 if len(emails) >= 3:
-#                     break
-#     api_key = "AIzaSyDyS3MDtriKTOr0dSSbjj6dAacbqEe2wuU"  # Replace with your Gemini API key
-#     results = []
-
-#     for email in emails:
-#         subject = email.get('subject', '')
-#         content = email.get('content', '')
-
-#         prompt_template = f"""
-#         You are an AI that extracts potential work-related tasks from emails.
-#         Email Subject: {subject}
-#         Email Content: {content}
-        
-#         If the email describes a work-related task, return a JSON list of objects with:
-#         [
-#           {{
-#             "task_name": "A short name",
-#             "description": "A brief description",
-#             "deadline": "A realistic date *only* in the date format dd/mm/yyy or 'None'"
-#           }}
-#         ]
-#         If the email does not describe a work-related task, return an empty list. Return only the JSON no text following or preceding it.
-#         """
-#         gemini_result = llm_interface.call_gemini(prompt_template, api_key, disable_parse=True)
-#         if "[" in gemini_result and "]" in gemini_result:
-#             start = gemini_result.find("[")
-#             end = gemini_result.rfind("]") + 1
-#             result = gemini_result[start:end]
-#         else:
-#             raise ValueError("Model did not return a valid dictionary.")
-#         results.append({ 
-#             "subject": subject, 
-#             "content": content, 
-#             "tasks": result 
-#         })
-
-#     return jsonify({
-#         "status": "success",
-#         "data": results
-#     }), 200
-
 
 @app.route('/api/send_tasks_notion', methods=['GET'])
 def send_tasks_notion():
